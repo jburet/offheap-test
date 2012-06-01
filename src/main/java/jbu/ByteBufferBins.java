@@ -1,6 +1,7 @@
 package jbu;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
@@ -24,17 +25,24 @@ public class ByteBufferBins {
     private ByteBuffer bb;
 
     // Chunk real size
-    private final int finalChunkSize;
+    final int finalChunkSize;
     // Userdata chunk size
     final int chunkSize;
+    // Base addr of bin
+    final int baseAddr;
+
+    // Helper for find free chunk
+    int chunkOffset = 0;
 
     /**
      * Status of memory chunk (allocated, free)
      */
-    AtomicIntegerArray chunks;
+    final AtomicIntegerArray chunks;
+    final AtomicInteger occupation = new AtomicInteger(0);
+    final int size;
 
-
-    ByteBufferBins(int initialChunkNumber, int chunkSize) {
+    ByteBufferBins(int initialChunkNumber, int chunkSize, int baseAddr) {
+        this.size = initialChunkNumber;
         if (initialChunkNumber <= 0) {
             // Throw exception
             throw new InvalidParameterException("InitialChunkNumber must be > 0 ");
@@ -44,9 +52,11 @@ public class ByteBufferBins {
             throw new InvalidParameterException("chunkSize must be > 0 ");
         }
         // In a chunk we also store chunck size in int. Adding 4 byte
+        // And addr of next chunk. Adding 8 byte
         // FIXME can be optimised. Using less bytes if chunksize < 256 or < 65000
-        this.finalChunkSize = chunkSize + 4;
+        this.finalChunkSize = chunkSize + 4 + 8;
         this.chunkSize = chunkSize;
+        this.baseAddr = baseAddr;
 
         // FIXME Cannot allocate more than Integer.MAX_VALUE. Check this
         this.bb = ByteBuffer.allocateDirect(initialChunkNumber * finalChunkSize);
@@ -68,7 +78,7 @@ public class ByteBufferBins {
             throw new BufferOverflowException("Try to store too many data. Store "
                     + data.length + " in " + this.chunkSize);
         }
-        int baseAddr = findAddrForChunkId(chunkId);
+        int baseAddr = findOffsetForChunkId(chunkId);
         bb.putInt(baseAddr, length);
         for (int i = 0; i < length; i++) {
             bb.put(baseAddr + 4 + i, data[i + currentOffset]);
@@ -83,7 +93,7 @@ public class ByteBufferBins {
      * @return
      */
     byte[] loadFromChunk(int chunkId) {
-        int baseAddr = findAddrForChunkId(chunkId);
+        int baseAddr = findOffsetForChunkId(chunkId);
         int size = bb.getInt(baseAddr);
         byte[] data = new byte[size];
         for (int i = 0; i < size; i++) {
@@ -99,26 +109,32 @@ public class ByteBufferBins {
      * @param n
      * @return
      */
-    int[] allocateNChunk(int n) {
+    long[] allocateNChunk(int n) {
         // Check parameter
         if (n <= 0) {
             return null;
         }
-        int[] res = new int[n];
+        long[] res = new long[n];
         int nbChunckAllocated = 0;
         // Search for n free chunk
-        for (int i = 0; i < chunks.length(); i++) {
-            if (chunks.compareAndSet(i, FREE, USED)) {
-                res[nbChunckAllocated] = i;
+        for (int i = 0; i < this.size; i++) {
+            int currentChunkIndex = (i + chunkOffset) % this.size;
+            if (chunks.compareAndSet(currentChunkIndex, FREE, USED)) {
+                res[nbChunckAllocated] = AddrAlign.constructAddr(baseAddr, currentChunkIndex);
+            } else {
+                continue;
             }
             if (++nbChunckAllocated == n) {
+                chunkOffset += nbChunckAllocated;
+                occupation.getAndAdd(nbChunckAllocated);
                 return res;
             }
         }
         // Not enough chunk. Unallocate
         for (int i = 0; i < nbChunckAllocated; i++) {
-            chunks.set(i, FREE);
+            chunks.compareAndSet(AddrAlign.getChunkId(res[i]), USED, FREE);
         }
+        occupation.getAndAdd(-nbChunckAllocated);
         return null;
     }
 
@@ -127,14 +143,28 @@ public class ByteBufferBins {
      *
      * @param chunks
      */
-    void freeChunk(int... chunks) {
-        for (int i = 0; i < chunks.length; i++) {
-            this.chunks.set(i, FREE);
+    void freeChunk(long... chunks) {
+        for (long chunkAdr : chunks) {
+            this.chunks.set(AddrAlign.getChunkId(chunkAdr), FREE);
+            occupation.decrementAndGet();
         }
     }
 
-    private int findAddrForChunkId(int chunkId) {
+    void setNextChunkId(int currentChunkId, long nextChunkId) {
+        // Set nextChunkId to last 8 bytes of currentChunkId
+        int nextChunkOffset = findOffsetForChunkId(currentChunkId) + chunkSize + 4;
+        bb.putLong(nextChunkOffset, nextChunkId);
+    }
+
+    long getNextChunkId(int currentChunkId) {
+        // Set nextChunkId to last 8 bytes of currentChunkId
+        int nextChunkOffset = findOffsetForChunkId(currentChunkId) + chunkSize + 4;
+        return bb.getLong(nextChunkOffset);
+    }
+
+    private int findOffsetForChunkId(int chunkId) {
         return chunkId * finalChunkSize;
     }
+
 
 }
