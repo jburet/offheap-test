@@ -19,7 +19,7 @@ public class Allocator {
     private final int maxMemory;
 
     public Allocator(int maxMemory, boolean unsafe) {
-        constructWithLogScale(maxMemory / 10, 10, unsafe);
+        constructWithLogScale(maxMemory, 10, unsafe);
         this.maxMemory = maxMemory;
     }
 

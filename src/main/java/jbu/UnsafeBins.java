@@ -6,8 +6,12 @@ import java.lang.reflect.Field;
 
 public class UnsafeBins extends Bins {
 
+    static final long UNSAFE_COPY_THRESHOLD = 1024L * 1024L;
+
+    private long arrayBaseOffset = (long)unsafe.arrayBaseOffset(byte[].class);
+
     // Unsafe instanciation
-    private Unsafe unsafe = getUnsafeInstance();
+    private static final Unsafe unsafe = getUnsafeInstance();
 
     private static Unsafe getUnsafeInstance() {
         try {
@@ -41,9 +45,17 @@ public class UnsafeBins extends Bins {
 
         // put the length
         unsafe.putInt(baseAddr, length);
-        for (int i = 0; i < length; i++) {
-            unsafe.putByte(baseAddr + 4 + i, data[i + currentOffset]);
+
+        long dstAddr = baseAddr + 4;
+        long offset = arrayBaseOffset;
+        while (length > 0) {
+            long size = (length > UNSAFE_COPY_THRESHOLD) ? UNSAFE_COPY_THRESHOLD : length;
+            unsafe.copyMemory(data, offset, null, dstAddr, size);
+            length -= size;
+            offset += size;
+            dstAddr += size;
         }
+
         return true;
     }
 

@@ -82,7 +82,7 @@ public class BenchAllocator {
         Allocator a = new Allocator(400 * 1024 * 1024, true);
 
         // the bench
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 3000000; i++) {
             // Do something
             // If less than 500 ref create
             if (refs.size() < 500) {
