@@ -14,7 +14,7 @@ public class TestAllocator {
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
         }
-        Allocator allocator = new Allocator(10 * 1024 * 1024);
+        Allocator allocator = new Allocator(10 * 1024 * 1024, false);
         long firstChunk = allocator.alloc(10);
         allocator.store(firstChunk, data);
         byte[] dataRes = allocator.load(firstChunk);
@@ -27,7 +27,7 @@ public class TestAllocator {
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
         }
-        Allocator allocator = new Allocator(10 * 1024 * 1024);
+        Allocator allocator = new Allocator(10 * 1024 * 1024, false);
         long firstChunk = allocator.alloc(1500);
         allocator.store(firstChunk, data);
         byte[] dataRes = allocator.load(firstChunk);
@@ -40,7 +40,7 @@ public class TestAllocator {
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
         }
-        Allocator allocator = new Allocator(10 * 1024 * 1024);
+        Allocator allocator = new Allocator(10 * 1024 * 1024, false);
         long firstChunk = allocator.alloc(123456);
         allocator.store(firstChunk, data);
         byte[] dataRes = allocator.load(firstChunk);

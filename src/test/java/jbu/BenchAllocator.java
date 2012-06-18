@@ -16,7 +16,7 @@ public class BenchAllocator {
         byte[] data = new byte[1024];
         List<Long> chunks = new ArrayList<Long>();
 
-        Allocator a = new Allocator(100 * 1024 * 1024);
+        Allocator a = new Allocator(100 * 1024 * 1024, false);
         for (int i = 0; i < 100000; i++) {
             long start = System.nanoTime();
             long firstChunk = a.alloc(1024);
@@ -79,7 +79,7 @@ public class BenchAllocator {
         List<Long> refs = new ArrayList<Long>();
 
         // Use a 100 MB cache
-        Allocator a = new Allocator(400 * 1024 * 1024);
+        Allocator a = new Allocator(400 * 1024 * 1024, true);
 
         // the bench
         for (int i = 0; i < 1000000; i++) {
@@ -92,7 +92,10 @@ public class BenchAllocator {
                 long ref = alloc(a, refs, data);
                 totals[rand] += System.nanoTime() - start;
                 nbAllocs[rand]++;
+                start = System.nanoTime();
                 a.store(ref, data);
+                totalWriteTime =+ System.nanoTime() - start;
+                nbWrite++;
 
             }
             // If more than 2000 ref free
@@ -113,7 +116,10 @@ public class BenchAllocator {
                     long ref = alloc(a, refs, data);
                     totals[rand] += System.nanoTime() - start;
                     nbAllocs[rand]++;
+                    start = System.nanoTime();
                     a.store(ref, data);
+                    totalWriteTime =+ System.nanoTime() - start;
+                    nbWrite++;
                 } else {
                     // free
                     int ref = r.nextInt(refs.size());
@@ -129,6 +135,8 @@ public class BenchAllocator {
             System.out.println("Means allocation : " + totals[i] / nbAllocs[i] + " ns");
         }
         System.out.println("Means free : " + totalFreeTime / nbFree + " ns");
+        System.out.println("Total Write : " + totalWriteTime + " ns");
+        System.out.println("Means Write : " + totalWriteTime / nbWrite + " ns");
     }
 
     private void free(Allocator a, List<Long> refs, long ref) {

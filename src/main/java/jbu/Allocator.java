@@ -11,24 +11,29 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Allocator {
 
-    private final Map<Integer, ByteBufferBins> binsByAddr = new HashMap<Integer, ByteBufferBins>();
-    private final TreeMap<Integer, ByteBufferBins> binsBySize = new TreeMap<Integer, ByteBufferBins>();
+    private final Map<Integer, Bins> binsByAddr = new HashMap<Integer, Bins>();
+    private final TreeMap<Integer, Bins> binsBySize = new TreeMap<Integer, Bins>();
 
     private final AtomicInteger allocatedMemory = new AtomicInteger(0);
-    private final AtomicInteger usedMemory = new AtomicInteger(0);
+    private volatile int usedMemory = 0;
 
-    public Allocator(int maxMemory) {
-        constructWithLogScale(maxMemory, 10);
+    public Allocator(int maxMemory, boolean unsafe) {
+        constructWithLogScale(maxMemory, 10, unsafe);
     }
 
-    private void constructWithLogScale(int maxMemory, int maxBins) {
+    private void constructWithLogScale(int maxMemory, int maxBins, boolean unsafe) {
         // Construct scale
         // Always start from 128 Bytes
         // FIXME... I don't think size distribution must be equal
         int binsSize = maxMemory / maxBins;
         int currentChunkSize = 128;
         for (int i = 0; i < maxBins; i++) {
-            ByteBufferBins bbb = new ByteBufferBins(binsSize / currentChunkSize, currentChunkSize, i);
+            Bins bbb;
+            if (unsafe) {
+                bbb = new UnsafeBins(binsSize / currentChunkSize, currentChunkSize, i);
+            } else {
+                bbb = new ByteBufferBins(binsSize / currentChunkSize, currentChunkSize, i);
+            }
             binsBySize.put(currentChunkSize, bbb);
             binsByAddr.put(i, bbb);
             currentChunkSize = currentChunkSize * 2;
@@ -50,14 +55,14 @@ public class Allocator {
         }
         // Get the bin
 
-        ByteBufferBins bin = binsBySize.get(upperKey);
+        Bins bin = binsBySize.get(upperKey);
         int nbChunck = memorySize / upperKey;
         int endSize = memorySize % upperKey;
         long lastchunk = -1;
         // Manage efficiency vs group chunk for less fragment
         if (nbChunck != 0 && endSize > 0 && endSize <= upperKey / 2) {
             // In this case choose efficiency and store end in another bin
-            ByteBufferBins endBin = binsBySize.ceilingEntry(endSize).getValue();
+            Bins endBin = binsBySize.ceilingEntry(endSize).getValue();
             lastchunk = endBin.allocateNChunk(1)[0];
         } else {
             nbChunck++;
@@ -84,7 +89,7 @@ public class Allocator {
         setNextChunk(currentChunkAdr, -1);
 
         // update counter
-        usedMemory.getAndAdd(bin.finalChunkSize * nbChunck);
+        usedMemory += bin.finalChunkSize * nbChunck;
         // Return first chunk addr
         return chunksAddrs[0];
     }
@@ -96,13 +101,13 @@ public class Allocator {
         long currentAdr = firstChunkAdr;
         long nextAdr;
         do {
-            ByteBufferBins bin = getBinFromAddr(currentAdr);
+            Bins bin = getBinFromAddr(currentAdr);
             nextAdr = bin.getNextChunkId(AddrAlign.getChunkId(currentAdr));
             // and free current
             bin.freeChunk(currentAdr);
             currentAdr = nextAdr;
             // update counter
-            usedMemory.getAndAdd(-bin.finalChunkSize);
+            usedMemory -= bin.finalChunkSize;
         } while (nextAdr != -1);
     }
 
@@ -119,7 +124,7 @@ public class Allocator {
             if (currentChunkAdr == -1) {
                 throw new BufferOverflowException("Data is too large");
             }
-            ByteBufferBins bin = getBinFromAddr(currentChunkAdr);
+            Bins bin = getBinFromAddr(currentChunkAdr);
             int chunkSize = bin.chunkSize;
             bin.storeInChunk(currentChunkId, data, currentOffset,
                     (data.length - currentOffset > chunkSize) ? chunkSize : data.length - currentOffset);
@@ -136,7 +141,7 @@ public class Allocator {
         // Get data of current chunk
         while (currentChunkAdr != -1) {
             int currentChunkId = AddrAlign.getChunkId(currentChunkAdr);
-            ByteBufferBins bin = getBinFromAddr(currentChunkAdr);
+            Bins bin = getBinFromAddr(currentChunkAdr);
             tmpB = bin.loadFromChunk(currentChunkId);
             bout.write(tmpB, 0, tmpB.length);
             // get next chunk
@@ -150,7 +155,7 @@ public class Allocator {
         getBinFromAddr(currentChunkAdr).setNextChunkId(AddrAlign.getChunkId(currentChunkAdr), nextChunkAddr);
     }
 
-    private ByteBufferBins getBinFromAddr(long chunkAddr) {
+    private Bins getBinFromAddr(long chunkAddr) {
         return binsByAddr.get(AddrAlign.getBinId(chunkAddr));
     }
 }
