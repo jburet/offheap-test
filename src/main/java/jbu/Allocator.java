@@ -16,16 +16,18 @@ public class Allocator {
 
     private final AtomicInteger allocatedMemory = new AtomicInteger(0);
     private volatile int usedMemory = 0;
+    private final int maxMemory;
 
     public Allocator(int maxMemory, boolean unsafe) {
-        constructWithLogScale(maxMemory, 10, unsafe);
+        constructWithLogScale(maxMemory / 10, 10, unsafe);
+        this.maxMemory = maxMemory;
     }
 
-    private void constructWithLogScale(int maxMemory, int maxBins, boolean unsafe) {
+    private void constructWithLogScale(int initialMemory, int maxBins, boolean unsafe) {
         // Construct scale
         // Always start from 128 Bytes
         // FIXME... I don't think size distribution must be equal
-        int binsSize = maxMemory / maxBins;
+        int binsSize = initialMemory / maxBins;
         int currentChunkSize = 128;
         for (int i = 0; i < maxBins; i++) {
             Bins bbb;
@@ -38,6 +40,54 @@ public class Allocator {
             binsByAddr.put(i, bbb);
             currentChunkSize = currentChunkSize * 2;
         }
+    }
+
+    // Allocate with less waste but much more chunks
+    public long alloc2(int memorySize) {
+        int usedMemoryByAllocate = 0;
+        int memoryToAllocate = memorySize;
+        long previousChunkAddr = -1;
+        long firstChunk = -1;
+        // Search for the bin with just size lesser
+        while (memoryToAllocate > 0) {
+            Map.Entry<Integer, Bins> usedBin;
+            // Search upper and lesser
+            Map.Entry<Integer, Bins> lesserBin = binsBySize.floorEntry(memoryToAllocate);
+            Map.Entry<Integer, Bins> upperBin = binsBySize.ceilingEntry(memoryToAllocate);
+            // Fill factor determine when stop cutting in two memory to allocate
+            if (lesserBin == null || (((double) memorySize / (double) lesserBin.getKey()) > 0.75d && upperBin != null)) {
+                // take upper
+                usedBin = upperBin;
+            } else {
+                usedBin = lesserBin;
+            }
+            // Allocate one chunk
+            long chunkAddr = usedBin.getValue().allocateOneChunk();
+
+            // If no chunk available
+            while (chunkAddr < 0) {
+                // take just lower bins and try to allocated
+                usedBin = binsBySize.lowerEntry(usedBin.getKey());
+                chunkAddr = usedBin.getValue().allocateOneChunk();
+            }
+
+            // update next chunk of previous element
+            if (previousChunkAddr > 0) {
+                setNextChunk(previousChunkAddr, chunkAddr);
+            } else {
+                // First chunk
+                firstChunk = chunkAddr;
+            }
+            previousChunkAddr = chunkAddr;
+            // update memory to allocate
+            memoryToAllocate -= usedBin.getKey();
+            // update used memory
+            usedMemoryByAllocate += usedBin.getValue().finalChunkSize;
+        }
+        // Set no next chunk to last chunk
+        setNextChunk(previousChunkAddr, -1);
+        this.usedMemory += usedMemoryByAllocate;
+        return firstChunk;
     }
 
     public long alloc(int memorySize) {

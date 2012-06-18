@@ -85,7 +85,7 @@ public class BenchAllocator {
         for (int i = 0; i < 1000000; i++) {
             // Do something
             // If less than 500 ref create
-            if (refs.size() < 50) {
+            if (refs.size() < 500) {
                 int rand = r.nextInt(datas.length);
                 byte[] data = datas[rand];
                 long start = System.nanoTime();
@@ -99,7 +99,7 @@ public class BenchAllocator {
 
             }
             // If more than 2000 ref free
-            else if (refs.size() > 100) {
+            else if (refs.size() > 1000) {
                 int ref = r.nextInt(refs.size());
                 long start = System.nanoTime();
                 free(a, refs, refs.get(ref));
@@ -145,7 +145,7 @@ public class BenchAllocator {
     }
 
     private long alloc(Allocator a, List<Long> refs, byte[] data) {
-        long ref = a.alloc(data.length);
+        long ref = a.alloc2(data.length);
         refs.add(ref);
         return ref;
     }

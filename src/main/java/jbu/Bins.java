@@ -48,6 +48,17 @@ public abstract class Bins {
         this.chunks = new AtomicIntegerArray(initialChunkNumber);
     }
 
+    long allocateOneChunk() {
+        for (int i = 0; i < this.size; i++) {
+            int currentChunkIndex = (i + chunkOffset) % this.size;
+            if (chunks.compareAndSet(currentChunkIndex, FREE, USED)) {
+                return AddrAlign.constructAddr(baseAddr, currentChunkIndex);
+            }
+        }
+        // Cannot allocate one chunk
+        return -1;
+    }
+
     long[] allocateNChunk(int n) {
         // Check parameter
         if (n <= 0) {
