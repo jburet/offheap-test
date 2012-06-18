@@ -1,4 +1,4 @@
-package jbu;
+package jbu.offheap;
 
 public class BufferOverflowException extends RuntimeException {
 

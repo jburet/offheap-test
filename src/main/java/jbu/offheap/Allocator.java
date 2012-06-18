@@ -1,4 +1,4 @@
-package jbu;
+package jbu.offheap;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;

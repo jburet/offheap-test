@@ -1,8 +1,6 @@
-package jbu;
+package jbu.offheap;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
  * TODO

@@ -1,4 +1,4 @@
-package jbu;
+package jbu.offheap;
 
 import org.junit.Test;
 
