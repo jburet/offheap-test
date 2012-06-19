@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
-public class UnsafeBins extends Bins {
+public class UnsafeBins extends Bins implements UnsafeBinsMBean {
 
     static final long UNSAFE_COPY_THRESHOLD = 1024L * 1024L;
 

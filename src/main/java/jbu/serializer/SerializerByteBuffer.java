@@ -90,8 +90,9 @@ public class SerializerByteBuffer implements SerializerSink, SerializerSource {
 
     @Override
     public void writeString(String s) {
-        bb.putInt(s.length());
-        for (int i = 0; i < s.length(); i++) {
+        int sl = s.length();
+        bb.putInt(sl);
+        for (int i = 0; i < sl; i++) {
             char c = s.charAt(i);
             bb.putChar(c);
         }

@@ -50,7 +50,7 @@ public class Allocator implements AllocatorMBean {
     }
 
     // Allocate with less waste but much more chunks
-    public long alloc2(int memorySize) {
+    public long alloc(int memorySize) {
         int usedMemoryByAllocate = 0;
         int memoryToAllocate = memorySize;
         long previousChunkAddr = -1;

@@ -37,12 +37,17 @@ public class PrimitiveBeanSerializer implements Serializer<Object> {
             fields = registeredClass.get(obj.getClass());
         }
         for (Map.Entry<Field, Serializer> ent : fields.entrySet()) {
+            if (ent.getKey().getType().equals(int.class)) {
+                ent.getValue().serialize(UnsafeReflection.getInt(ent.getKey(), obj), serializerSink);
+            } else {
+                ent.getValue().serialize(UnsafeReflection.getObject(ent.getKey(), obj), serializerSink);
+            }
+            /*
             try {
                 ent.getValue().serialize(ent.getKey().get(obj), serializerSink);
             } catch (IllegalAccessException e) {
-                // Never append... in ideal world
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
+            }*/
         }
     }
 

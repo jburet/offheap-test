@@ -129,15 +129,4 @@ public class ByteBufferBins extends Bins implements ByteBufferBinsMBean {
         int nextChunkOffset = findOffsetForChunkId(currentChunkId) + chunkSize + 4;
         return bb.getLong(nextChunkOffset);
     }
-
-
-    @Override
-    public int getAllocatedChunks() {
-        return occupation.intValue();
-    }
-
-    @Override
-    public int getUsedSize() {
-        return occupation.intValue() * finalChunkSize;
-    }
 }

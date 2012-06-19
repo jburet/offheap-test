@@ -4,12 +4,9 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-<<<<<<< HEAD:src/test/java/jbu/offheap/BenchAllocator.java
 import java.nio.ByteBuffer;
-=======
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
->>>>>>> fix: multi thread + management:src/test/java/jbu/BenchAllocator.java
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -31,13 +28,8 @@ public class BenchAllocator {
         byte[] data = new byte[100];
         List<Long> chunks = new ArrayList<Long>();
 
-<<<<<<< HEAD:src/test/java/jbu/offheap/BenchAllocator.java
         Allocator a = new Allocator(100 * 1024 * 1024, false);
         for (int i = 0; i < 100000; i++) {
-=======
-        Allocator a = new Allocator(100 * 1024 * 1024);
-        for (int i = 1; i < 10001; i++) {
->>>>>>> fix: multi thread + management:src/test/java/jbu/BenchAllocator.java
             long start = System.nanoTime();
             long firstChunk = a.alloc(100);
             a.store(firstChunk, data);
@@ -89,6 +81,9 @@ public class BenchAllocator {
         long totalFreeTime = 0;
         long nbFree = 0;
 
+        long nbWrite = 0;
+        long totalWriteTime = 0;
+
         /*
         byte[] data100 = new byte[100];
         byte[] data300 = new byte[300];
@@ -106,25 +101,16 @@ public class BenchAllocator {
         List<Long> refs = new ArrayList<Long>();
 
         // Use a 100 MB cache
-<<<<<<< HEAD:src/test/java/jbu/offheap/BenchAllocator.java
         Allocator a = new Allocator(400 * 1024 * 1024, true);
-=======
-        Allocator a = new Allocator(400 * 1024 * 1024);
         a.registerInMBeanServer(mbs);
->>>>>>> fix: multi thread + management:src/test/java/jbu/BenchAllocator.java
 
         // the bench
-        for (int i = 0; i < 30000000; i++) {
+        for (int i = 0; i < 10000000; i++) {
             // Do something
             // If less than 500 ref create
             if (refs.size() < 500) {
-<<<<<<< HEAD:src/test/java/jbu/offheap/BenchAllocator.java
                 int rand = r.nextInt(bbs.length);
                 ByteBuffer data = bbs[rand];
-=======
-                int rand = r.nextInt(datas.length);
-                byte[] data = datas[rand];
->>>>>>> fix: multi thread + management:src/test/java/jbu/BenchAllocator.java
                 long start = System.nanoTime();
                 long ref = alloc(a, refs, data);
                 totals[rand] += System.nanoTime() - start;
@@ -172,17 +158,16 @@ public class BenchAllocator {
             System.out.println("Means allocation : " + totals[i] / nbAllocs[i] + " ns");
         }
         System.out.println("Means free : " + totalFreeTime / nbFree + " ns");
-<<<<<<< HEAD:src/test/java/jbu/offheap/BenchAllocator.java
+
         System.out.println("Total Write : " + totalWriteTime + " ns");
         System.out.println("Means Write : " + totalWriteTime / nbWrite + " ns");
-=======
         a.unRegisterInMBeanServer(mbs);
     }
 
     @Test
     public void multi_thread_bench() {
         // Use a 100 MB cache
-        Allocator a = new Allocator(800 * 1024 * 1024);
+        Allocator a = new Allocator(800 * 1024 * 1024, true);
         a.registerInMBeanServer(mbs);
 
         AllocRunnable ar1 = new AllocRunnable(a);
@@ -230,7 +215,6 @@ public class BenchAllocator {
 
 
         a.unRegisterInMBeanServer(mbs);
->>>>>>> fix: multi thread + management:src/test/java/jbu/BenchAllocator.java
     }
 
     private void free(Allocator a, List<Long> refs, long ref) {
@@ -238,14 +222,8 @@ public class BenchAllocator {
         refs.remove(ref);
     }
 
-<<<<<<< HEAD:src/test/java/jbu/offheap/BenchAllocator.java
     private long alloc(Allocator a, List<Long> refs, ByteBuffer data) {
-        long ref = a.alloc2(data.capacity());
-=======
-    private long alloc(Allocator a, List<Long> refs, byte[] data) {
-
-        long ref = a.alloc(data.length);
->>>>>>> fix: multi thread + management:src/test/java/jbu/BenchAllocator.java
+        long ref = a.alloc(data.capacity());
         refs.add(ref);
         return ref;
     }
@@ -289,7 +267,8 @@ public class BenchAllocator {
                 // If less than 500 ref create
                 if (refs.size() < 500) {
                     int rand = r.nextInt(datas.length);
-                    byte[] data = datas[rand];
+                    byte[] buffer = datas[rand];
+                    ByteBuffer data = ByteBuffer.allocateDirect(buffer.length);
                     long start = System.nanoTime();
                     long ref = alloc(a, refs, data);
                     totals[rand] += System.nanoTime() - start;
@@ -311,7 +290,8 @@ public class BenchAllocator {
                     if (r.nextBoolean()) {
                         // Create
                         int rand = r.nextInt(datas.length);
-                        byte[] data = datas[rand];
+                        byte[] buffer = datas[rand];
+                        ByteBuffer data = ByteBuffer.allocateDirect(buffer.length);
                         long start = System.nanoTime();
                         long ref = alloc(a, refs, data);
                         totals[rand] += System.nanoTime() - start;

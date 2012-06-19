@@ -118,5 +118,11 @@ public abstract class Bins {
         return chunkId * finalChunkSize;
     }
 
+    public int getAllocatedChunks() {
+        return occupation.intValue();
+    }
 
+    public int getUsedSize() {
+        return occupation.intValue() * finalChunkSize;
+    }
 }
