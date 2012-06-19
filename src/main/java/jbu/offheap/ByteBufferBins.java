@@ -9,10 +9,10 @@ import java.nio.ByteBuffer;
  */
 
 /**
- * Some memory not allocated in heap, storing byte[] in fixed size chunk and keeping status of chunk (used, free)
+ * A lot of memory not allocated in heap, storing byte[] in fixed maxChunk chunk and keeping status of chunk (used, free)
  * This bins use DirectbyteBuffer for accessing memory
  */
-public class ByteBufferBins extends Bins {
+public class ByteBufferBins extends Bins implements ByteBufferBinsMBean {
 
     /**
      * Bytebuffer allocated for storing all page
@@ -21,6 +21,7 @@ public class ByteBufferBins extends Bins {
 
     ByteBufferBins(int initialChunkNumber, int chunkSize, int baseAddr) {
         super(initialChunkNumber, chunkSize, baseAddr);
+
         // FIXME Cannot allocate more than Integer.MAX_VALUE. Check this
         this.bb = ByteBuffer.allocateDirect(initialChunkNumber * finalChunkSize);
     }
@@ -129,4 +130,14 @@ public class ByteBufferBins extends Bins {
         return bb.getLong(nextChunkOffset);
     }
 
+
+    @Override
+    public int getAllocatedChunks() {
+        return occupation.intValue();
+    }
+
+    @Override
+    public int getUsedSize() {
+        return occupation.intValue() * finalChunkSize;
+    }
 }

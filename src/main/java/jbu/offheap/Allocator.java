@@ -1,35 +1,41 @@
 package jbu.offheap;
 
+import javax.management.*;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Frontend of off-heap store
  */
-public class Allocator {
+public class Allocator implements AllocatorMBean {
 
+    //Thread safe until cannot be modified at runtime
     private final Map<Integer, Bins> binsByAddr = new HashMap<Integer, Bins>();
+    //Thread safe until cannot be modified at runtime
     private final TreeMap<Integer, Bins> binsBySize = new TreeMap<Integer, Bins>();
 
     private final AtomicInteger allocatedMemory = new AtomicInteger(0);
-    private volatile int usedMemory = 0;
-    private final int maxMemory;
+    private final AtomicInteger usedMemory = new AtomicInteger(0);
+    private final AtomicLong nbAllocation = new AtomicLong(0);
+    private final AtomicLong nbFree = new AtomicLong(0);
+
 
     public Allocator(int maxMemory, boolean unsafe) {
-        constructWithLogScale(maxMemory, 10, unsafe);
-        this.maxMemory = maxMemory;
+        constructWithLogScale(maxMemory, 16, unsafe);
     }
 
     private void constructWithLogScale(int initialMemory, int maxBins, boolean unsafe) {
         // Construct scale
         // Always start from 128 Bytes
-        // FIXME... I don't think size distribution must be equal
+
         int binsSize = initialMemory / maxBins;
-        int currentChunkSize = 128;
+        int currentChunkSize = 32;
+
         for (int i = 0; i < maxBins; i++) {
             Bins bbb;
             if (unsafe) {
@@ -49,6 +55,7 @@ public class Allocator {
         int memoryToAllocate = memorySize;
         long previousChunkAddr = -1;
         long firstChunk = -1;
+        int nbAllocateChunk = 0;
         // Search for the bin with just size lesser
         while (memoryToAllocate > 0) {
             Map.Entry<Integer, Bins> usedBin;
@@ -84,65 +91,14 @@ public class Allocator {
             memoryToAllocate -= usedBin.getKey();
             // update used memory
             usedMemoryByAllocate += usedBin.getValue().finalChunkSize;
+
+            nbAllocateChunk++;
         }
         // Set no next chunk to last chunk
         setNextChunk(previousChunkAddr, -1);
-        this.usedMemory += usedMemoryByAllocate;
+        this.usedMemory.getAndAdd(usedMemoryByAllocate);
+        this.nbAllocation.getAndAdd(nbAllocateChunk);
         return firstChunk;
-    }
-
-    public long alloc(int memorySize) {
-        // Search for the bin with size just upper
-        Integer upperKey = binsBySize.ceilingKey(memorySize);
-        // upperKey can be null... In this case take the upper's key
-        if (upperKey == null) {
-            upperKey = binsBySize.lastKey();
-        } else if (memorySize < (double) upperKey * 0.75d) {
-            Integer floorKey = binsBySize.floorKey(memorySize);
-            if (floorKey != null) {
-                // use floor key
-                upperKey = floorKey;
-            }
-        }
-        // Get the bin
-
-        Bins bin = binsBySize.get(upperKey);
-        int nbChunck = memorySize / upperKey;
-        int endSize = memorySize % upperKey;
-        long lastchunk = -1;
-        // Manage efficiency vs group chunk for less fragment
-        if (nbChunck != 0 && endSize > 0 && endSize <= upperKey / 2) {
-            // In this case choose efficiency and store end in another bin
-            Bins endBin = binsBySize.ceilingEntry(endSize).getValue();
-            lastchunk = endBin.allocateNChunk(1)[0];
-        } else {
-            nbChunck++;
-        }
-        long[] chunksAddrs = bin.allocateNChunk(nbChunck);
-        if (chunksAddrs == null) {
-            // Memory cannot be allocated
-            return -1;
-        }
-        // Create chunk linkedlist
-        long currentChunkAdr = -1;
-        for (long chunkAddr : chunksAddrs) {
-            if (currentChunkAdr >= 0) {
-                // set nextchunk to currentChunkId
-                setNextChunk(currentChunkAdr, chunkAddr);
-            }
-            currentChunkAdr = chunkAddr;
-        }
-        if (lastchunk >= 0) {
-            setNextChunk(currentChunkAdr, lastchunk);
-            currentChunkAdr = lastchunk;
-        }
-        // On the last chunk put -1 as next chunk reference
-        setNextChunk(currentChunkAdr, -1);
-
-        // update counter
-        usedMemory += bin.finalChunkSize * nbChunck;
-        // Return first chunk addr
-        return chunksAddrs[0];
     }
 
     public void free(long firstChunkAdr) {
@@ -158,7 +114,8 @@ public class Allocator {
             bin.freeChunk(currentAdr);
             currentAdr = nextAdr;
             // update counter
-            usedMemory -= bin.finalChunkSize;
+            usedMemory.getAndAdd(-bin.finalChunkSize);
+            nbFree.incrementAndGet();
         } while (nextAdr != -1);
     }
 
@@ -223,5 +180,59 @@ public class Allocator {
 
     private Bins getBinFromAddr(long chunkAddr) {
         return binsByAddr.get(AddrAlign.getBinId(chunkAddr));
+    }
+
+    public void registerInMBeanServer(MBeanServer mbs) {
+        try {
+            mbs.registerMBean(this, new ObjectName("Allocator:name=allocator"));
+            for (Bins bbb : binsBySize.values()) {
+                if (bbb instanceof ByteBufferBins) {
+                    mbs.registerMBean(bbb, new ObjectName("Allocator.ByteBufferBins:maxChunk=" + bbb.chunkSize));
+                }else if (bbb instanceof UnsafeBins) {
+                    mbs.registerMBean(bbb, new ObjectName("Allocator.UnsafeBins:maxChunk=" + bbb.chunkSize));
+                }
+            }
+        } catch (InstanceAlreadyExistsException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (MBeanRegistrationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (NotCompliantMBeanException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (MalformedObjectNameException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+    }
+
+    public void unRegisterInMBeanServer(MBeanServer mbs) {
+        try {
+            mbs.unregisterMBean(new ObjectName("Allocator:name=allocator"));
+        } catch (InstanceNotFoundException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (MBeanRegistrationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (MalformedObjectNameException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+    }
+
+    @Override
+    public int getAllocatedMemory() {
+        return allocatedMemory.intValue();
+    }
+
+    @Override
+    public int getUsedMemory() {
+        return usedMemory.intValue();
+    }
+
+    @Override
+    public long getNbAllocation() {
+        return nbAllocation.longValue();
+    }
+
+    @Override
+    public long getNbFree() {
+        return nbFree.longValue();
     }
 }
