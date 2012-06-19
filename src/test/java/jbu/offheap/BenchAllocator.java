@@ -3,6 +3,7 @@ package jbu.offheap;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
 import java.util.*;
 
 public class BenchAllocator {
@@ -67,6 +68,7 @@ public class BenchAllocator {
         long totalFreeTime = 0;
         long nbFree = 0;
 
+        /*
         byte[] data100 = new byte[100];
         byte[] data300 = new byte[300];
         byte[] data4 = new byte[4];
@@ -75,6 +77,10 @@ public class BenchAllocator {
         byte[] data123456 = new byte[123456];
         byte[] data1 = new byte[1];
         byte[][] datas = new byte[][]{data100, data300, data4, data10000, data8200, data123456, data1};
+        */
+        ByteBuffer[] bbs = new ByteBuffer[]{ByteBuffer.allocateDirect(100), ByteBuffer.allocateDirect(300),
+                ByteBuffer.allocateDirect(4), ByteBuffer.allocateDirect(10000), ByteBuffer.allocateDirect(8200),
+                ByteBuffer.allocateDirect(123456), ByteBuffer.allocateDirect(1)};
 
         List<Long> refs = new ArrayList<Long>();
 
@@ -82,19 +88,19 @@ public class BenchAllocator {
         Allocator a = new Allocator(400 * 1024 * 1024, true);
 
         // the bench
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 30000000; i++) {
             // Do something
             // If less than 500 ref create
             if (refs.size() < 500) {
-                int rand = r.nextInt(datas.length);
-                byte[] data = datas[rand];
+                int rand = r.nextInt(bbs.length);
+                ByteBuffer data = bbs[rand];
                 long start = System.nanoTime();
                 long ref = alloc(a, refs, data);
                 totals[rand] += System.nanoTime() - start;
                 nbAllocs[rand]++;
                 start = System.nanoTime();
                 a.store(ref, data);
-                totalWriteTime =+ System.nanoTime() - start;
+                totalWriteTime = +System.nanoTime() - start;
                 nbWrite++;
 
             }
@@ -110,15 +116,15 @@ public class BenchAllocator {
             else {
                 if (r.nextBoolean()) {
                     // Create
-                    int rand = r.nextInt(datas.length);
-                    byte[] data = datas[rand];
+                    int rand = r.nextInt(bbs.length);
+                    ByteBuffer data = bbs[rand];
                     long start = System.nanoTime();
                     long ref = alloc(a, refs, data);
                     totals[rand] += System.nanoTime() - start;
                     nbAllocs[rand]++;
                     start = System.nanoTime();
                     a.store(ref, data);
-                    totalWriteTime =+ System.nanoTime() - start;
+                    totalWriteTime = +System.nanoTime() - start;
                     nbWrite++;
                 } else {
                     // free
@@ -144,8 +150,8 @@ public class BenchAllocator {
         refs.remove(ref);
     }
 
-    private long alloc(Allocator a, List<Long> refs, byte[] data) {
-        long ref = a.alloc2(data.length);
+    private long alloc(Allocator a, List<Long> refs, ByteBuffer data) {
+        long ref = a.alloc2(data.capacity());
         refs.add(ref);
         return ref;
     }

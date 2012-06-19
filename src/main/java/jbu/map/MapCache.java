@@ -21,7 +21,7 @@ public class MapCache<K, V extends Serializable> {
             int serSize = serObj.length;
             long addr = allocator.alloc2(serSize);
             allocator.store(addr, serObj);
-            cache.put(key, new OffheapObject(value.getClass(), addr, serSize));
+        //    cache.put(key, new OffheapObject(value.getClass(), addr, serSize));
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

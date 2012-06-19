@@ -3,15 +3,30 @@ package jbu.offheap;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 
 public class UnsafeBins extends Bins {
 
     static final long UNSAFE_COPY_THRESHOLD = 1024L * 1024L;
 
-    private long arrayBaseOffset = (long)unsafe.arrayBaseOffset(byte[].class);
+    private long arrayBaseOffset = (long) unsafe.arrayBaseOffset(byte[].class);
 
     // Unsafe instanciation
     private static final Unsafe unsafe = getUnsafeInstance();
+
+    // Method for get address of a direct byte buffer
+    private final static Field bufferAddr;
+
+    static {
+        try {
+            bufferAddr = Buffer.class.getDeclaredField("address");
+            bufferAddr.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            // Never append ??
+            throw new RuntimeException("Cannot use UnsafeBins in this JVM", e);
+        }
+    }
 
     private static Unsafe getUnsafeInstance() {
         try {
@@ -57,6 +72,36 @@ public class UnsafeBins extends Bins {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean storeInChunk(int chunkId, ByteBuffer data) {
+        // Read only data between position and chunksize or buffer limit
+        if (data.isDirect()) {
+            // get base adress of the buffer
+            try {
+                int length = (data.remaining() > this.chunkSize) ? this.chunkSize : data.remaining();
+                long dataAddr = (Long) UnsafeBins.bufferAddr.get(data);
+                long baseAddr = findOffsetForChunkId(chunkId) + binAddr;
+
+                // put the length
+                unsafe.putInt(baseAddr, length);
+                long dstAddr = baseAddr + 4;
+                // put data from source position
+                unsafe.copyMemory(dataAddr + (data.position() << 0), dstAddr, length);
+                // update source position
+                data.position(data.position()+length);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                return false;
+            }
+            return true;
+        } else {
+            // Easy way put part to save in a byte array and call standard storeInChunk
+            byte[] tmp = new byte[this.chunkSize];
+            data.get(tmp);
+            return storeInChunk(chunkId, tmp, 0, this.chunkSize);
+        }
     }
 
     @Override

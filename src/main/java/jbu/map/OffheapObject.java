@@ -1,24 +1,33 @@
 package jbu.map;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.util.Map;
 
 /**
  *
  */
-public class OffheapObject {
+public class OffheapObject<T> {
 
-    public final Class<? extends Serializable> originalClass;
+    private static Map<Class, Serializer> serializers;
+
+    public static <T> OffheapObject fromObject(T object) {
+        return new OffheapObject(0, 0);
+    }
+
+    public static void registerSerializer(Class clazz, Serializer serializer) {
+        OffheapObject.serializers.put(clazz, serializer);
+    }
+
     public final long addr;
     public final int serializedSize;
 
-    public OffheapObject(Class<? extends Serializable> originalClass, long addr, int serializedSize) {
-        this.originalClass = originalClass;
+    private OffheapObject(long addr, int serializedSize) {
         this.addr = addr;
         this.serializedSize = serializedSize;
     }
+
+    public T getObject() {
+        return null;
+    }
+
+
 }

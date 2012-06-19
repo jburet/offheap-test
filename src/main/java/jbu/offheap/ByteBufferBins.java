@@ -49,6 +49,17 @@ public class ByteBufferBins extends Bins {
         return true;
     }
 
+    @Override
+    public boolean storeInChunk(int chunkId, ByteBuffer data) {
+        // Read only data between position and chunksize or buffer limit
+        int baseAddr = findOffsetForChunkId(chunkId);
+        int dataLength = (data.remaining() > this.chunkSize) ? this.chunkSize : data.remaining();
+        for (int i = 0; i < dataLength; i++) {
+            bb.put(baseAddr + 4 + i, data.get());
+        }
+        return true;
+    }
+
     /**
      * Return data stored in this chunk
      *
@@ -82,6 +93,7 @@ public class ByteBufferBins extends Bins {
         long[] res = new long[n];
         int nbChunckAllocated = 0;
         // Search for n free chunk
+        int chunkOffset = this.chunkOffset.get();
         for (int i = 0; i < this.size; i++) {
             int currentChunkIndex = (i + chunkOffset) % this.size;
             if (chunks.compareAndSet(currentChunkIndex, FREE, USED)) {
@@ -90,7 +102,7 @@ public class ByteBufferBins extends Bins {
                 continue;
             }
             if (++nbChunckAllocated == n) {
-                chunkOffset += nbChunckAllocated;
+                this.chunkOffset.set(currentChunkIndex + 1);
                 occupation.getAndAdd(nbChunckAllocated);
                 return res;
             }

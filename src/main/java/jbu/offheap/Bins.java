@@ -1,6 +1,7 @@
 package jbu.offheap;
 
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
@@ -26,7 +27,7 @@ public abstract class Bins {
     final AtomicIntegerArray chunks;
 
     // Helper for find free chunk
-    int chunkOffset = 0;
+    final AtomicInteger chunkOffset = new AtomicInteger(0);
 
     protected Bins(int initialChunkNumber, int chunkSize, int baseAddr) {
         this.size = initialChunkNumber;
@@ -49,6 +50,7 @@ public abstract class Bins {
     }
 
     long allocateOneChunk() {
+        int chunkOffset = this.chunkOffset.get();
         for (int i = 0; i < this.size; i++) {
             int currentChunkIndex = (i + chunkOffset) % this.size;
             if (chunks.compareAndSet(currentChunkIndex, FREE, USED)) {
@@ -67,6 +69,7 @@ public abstract class Bins {
         long[] res = new long[n];
         int nbChunckAllocated = 0;
         // Search for n free chunk
+        int chunkOffset = this.chunkOffset.get();
         for (int i = 0; i < this.size; i++) {
             int currentChunkIndex = (i + chunkOffset) % this.size;
             if (chunks.compareAndSet(currentChunkIndex, FREE, USED)) {
@@ -75,7 +78,7 @@ public abstract class Bins {
                 continue;
             }
             if (++nbChunckAllocated == n) {
-                chunkOffset += nbChunckAllocated;
+                this.chunkOffset.set(currentChunkIndex + 1);
                 occupation.getAndAdd(nbChunckAllocated);
                 return res;
             }
@@ -98,6 +101,7 @@ public abstract class Bins {
             this.chunks.set(AddrAlign.getChunkId(chunkAdr), FREE);
             occupation.decrementAndGet();
         }
+        this.chunkOffset.set(AddrAlign.getChunkId(chunks[0]));
     }
 
     abstract void setNextChunkId(int currentChunkId, long nextChunkId);
@@ -106,9 +110,13 @@ public abstract class Bins {
 
     abstract boolean storeInChunk(int chunkId, byte[] data, int currentOffset, int length);
 
+    abstract boolean storeInChunk(int currentChunkId, ByteBuffer data);
+
     abstract byte[] loadFromChunk(int chunkId);
 
     protected int findOffsetForChunkId(int chunkId) {
         return chunkId * finalChunkSize;
     }
+
+
 }

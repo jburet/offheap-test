@@ -1,6 +1,7 @@
 package jbu.offheap;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -164,8 +165,6 @@ public class Allocator {
 
     public void store(long firstChunkAdr, byte[] data) {
         // store in first chunk all data that's I can store
-        // FIXME get bin
-        // FIXME use size of bin
         long currentChunkAdr = firstChunkAdr;
         int currentOffset = 0;
         while (currentOffset < data.length) {
@@ -183,9 +182,26 @@ public class Allocator {
         }
     }
 
+    public void store(long firstChunkAdr, ByteBuffer data) {
+        // store in first chunk all data that's I can store
+        // The byte buffer must be ready for reading...
+        // Store only from position to limit
+        long currentChunkAdr = firstChunkAdr;
+        while (data.remaining() > 0) {
+            int currentChunkId = AddrAlign.getChunkId(currentChunkAdr);
+            // Check if currentChunkId = -1 Error
+            if (currentChunkAdr == -1) {
+                throw new BufferOverflowException("Data is too large");
+            }
+            Bins bin = getBinFromAddr(currentChunkAdr);
+            int chunkSize = bin.chunkSize;
+            bin.storeInChunk(currentChunkId, data);
+            currentChunkAdr = bin.getNextChunkId(currentChunkId);
+        }
+    }
+
     public byte[] load(long firstChunkAdr) {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        // FIXME get bin
         byte[] tmpB;
         long currentChunkAdr = firstChunkAdr;
         // Get data of current chunk

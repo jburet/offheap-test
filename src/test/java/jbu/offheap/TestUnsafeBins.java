@@ -2,6 +2,7 @@ package jbu.offheap;
 
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
@@ -73,6 +74,23 @@ public class TestUnsafeBins {
         UnsafeBins ub = new UnsafeBins(2, 15, 0);
         long[] chunks = ub.allocateNChunk(1);
         ub.storeInChunk(AddrAlign.getChunkId(chunks[0]), data, 0, data.length);
+        byte[] dataRes = ub.loadFromChunk(AddrAlign.getChunkId(chunks[0]));
+        assertTrue(Arrays.equals(data, dataRes));
+    }
+
+    @Test
+    public void store_chunk_from_direct_byte_buffer_should_be_loaded() {
+        byte[] data = new byte[10];
+        ByteBuffer bb = ByteBuffer.allocateDirect(10);
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) i;
+        }
+        bb.put(data);
+        bb.flip();
+
+        UnsafeBins ub = new UnsafeBins(2, 15, 0);
+        long[] chunks = ub.allocateNChunk(1);
+        ub.storeInChunk(AddrAlign.getChunkId(chunks[0]), bb);
         byte[] dataRes = ub.loadFromChunk(AddrAlign.getChunkId(chunks[0]));
         assertTrue(Arrays.equals(data, dataRes));
     }
