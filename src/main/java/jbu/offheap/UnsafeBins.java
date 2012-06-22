@@ -41,7 +41,7 @@ public class UnsafeBins extends Bins implements UnsafeBinsMBean {
         return null;
     }
 
-    private final long binAddr;
+    final long binAddr;
 
     UnsafeBins(int initialChunkNumber, int chunkSize, int baseAddr) {
         super(initialChunkNumber, chunkSize, baseAddr);

@@ -64,5 +64,47 @@ public class TestAllocator {
         assertTrue(Arrays.equals(data, dataRes));
     }
 
+    @Test
+    public void test_unsafe_store_int() {
+        int a = 42;
+        Allocator allocator = new Allocator(1 * 1024, true);
+        long firstChunk = allocator.alloc(4);
+        Allocator.StoreContext sc = allocator.getStoreContext(firstChunk, 4);
+        sc.storeInt(a);
+        Allocator.LoadContext lc = allocator.getLoadContext(firstChunk);
+        int b = lc.loadInt();
+        System.out.println(b);
+    }
 
+    @Test
+    public void test_unsafe_store_object_with_int() throws NoSuchFieldException {
+        OneInt oi = new OneInt(42);
+        Allocator allocator = new Allocator(1 * 1024, true);
+        long firstChunk = allocator.alloc(4);
+        Allocator.StoreContext sc = allocator.getStoreContext(firstChunk, 4);
+        sc.storeInt(oi, UnsafeUtil.unsafe.objectFieldOffset(OneInt.class.getDeclaredField("a")));
+        Allocator.LoadContext lc = allocator.getLoadContext(firstChunk);
+        OneInt oi2 = new OneInt(0);
+        lc.loadInt(oi2, UnsafeUtil.unsafe.objectFieldOffset(OneInt.class.getDeclaredField("a")));
+        System.out.println(oi2.a);
+    }
+
+    public static int byteArrayToInt(byte[] b) {
+        int value = 0;
+        for (int i = 0; i < 4; i++) {
+            int shift = (4 - 1 - i) * 8;
+            value += (b[i] & 0x000000FF) << shift;
+        }
+        return value;
+    }
+
+
+}
+
+class OneInt {
+    int a;
+
+    OneInt(int a) {
+        this.a = a;
+    }
 }

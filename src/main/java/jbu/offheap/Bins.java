@@ -114,7 +114,7 @@ public abstract class Bins {
 
     abstract byte[] loadFromChunk(int chunkId);
 
-    protected int findOffsetForChunkId(int chunkId) {
+    int findOffsetForChunkId(int chunkId) {
         return chunkId * finalChunkSize;
     }
 

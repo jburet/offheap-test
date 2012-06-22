@@ -1,5 +1,7 @@
 package jbu.offheap;
 
+import sun.misc.Unsafe;
+
 import javax.management.*;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -13,6 +15,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * Frontend of off-heap store
  */
 public class Allocator implements AllocatorMBean {
+
+    private static Unsafe unsafe = UnsafeUtil.unsafe;
 
     //Thread safe until cannot be modified at runtime
     private final Map<Integer, Bins> binsByAddr = new HashMap<Integer, Bins>();
@@ -39,7 +43,7 @@ public class Allocator implements AllocatorMBean {
         for (int i = 0; i < maxBins; i++) {
             Bins bbb;
             if (unsafe) {
-                bbb = new UnsafeBins(binsSize / currentChunkSize, currentChunkSize, i);
+                bbb = new UnsafeBins((int) Math.ceil((double) binsSize / (double) currentChunkSize), currentChunkSize, i);
             } else {
                 bbb = new ByteBufferBins(binsSize / currentChunkSize, currentChunkSize, i);
             }
@@ -157,6 +161,14 @@ public class Allocator implements AllocatorMBean {
         }
     }
 
+    public StoreContext getStoreContext(long firstChunkAdr, int size) {
+        return new StoreContext(firstChunkAdr, size);
+    }
+
+    public LoadContext getLoadContext(long firstChunkAdr) {
+        return new LoadContext(firstChunkAdr);
+    }
+
     public byte[] load(long firstChunkAdr) {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         byte[] tmpB;
@@ -188,7 +200,7 @@ public class Allocator implements AllocatorMBean {
             for (Bins bbb : binsBySize.values()) {
                 if (bbb instanceof ByteBufferBins) {
                     mbs.registerMBean(bbb, new ObjectName("Allocator.ByteBufferBins:maxChunk=" + bbb.chunkSize));
-                }else if (bbb instanceof UnsafeBins) {
+                } else if (bbb instanceof UnsafeBins) {
                     mbs.registerMBean(bbb, new ObjectName("Allocator.UnsafeBins:maxChunk=" + bbb.chunkSize));
                 }
             }
@@ -234,5 +246,106 @@ public class Allocator implements AllocatorMBean {
     @Override
     public long getNbFree() {
         return nbFree.longValue();
+    }
+
+    class StoreContext {
+
+        private long currentChunkAdr;
+        private long currentBaseAdr;
+        private int currentOffset;
+        private int remaining;
+
+        public StoreContext(long firstChunkAdr, int size) {
+            beginNewChunk(firstChunkAdr);
+            // Store size
+            storeInt(size);
+        }
+
+        public void storeInt(int value) {
+            unsafe.putInt(this.currentBaseAdr + this.currentOffset, value);
+            this.currentOffset += Primitive.INT_SIZE;
+            this.remaining -= Primitive.INT_SIZE;
+        }
+
+        public void storeInt(Object object, long offset) {
+            int byteRemaining = Primitive.INT_SIZE;
+            do {
+                int byteToCopy = (remaining > byteRemaining) ? byteRemaining : remaining;
+                byteRemaining -= byteToCopy;
+                unsafe.copyMemory(object, offset, null, this.currentBaseAdr + this.currentOffset, byteToCopy);
+                this.currentOffset += byteToCopy;
+                this.remaining -= byteToCopy;
+                // If remaining in currentChunk == 0 load next chunk
+                if (this.remaining == 0) {
+                    // Get next chunk address in last 4 byte
+                    beginNewChunk(unsafe.getInt(this.currentBaseAdr + this.currentOffset));
+                }
+            } while (byteRemaining > 0);
+        }
+
+        private void beginNewChunk(long chunkAdr) {
+            this.currentChunkAdr = chunkAdr;
+            // get bins
+            // FIXME Suport only unsafebin
+            // Get baseAdr of allocated memory
+            // Get baseOffset of chunk
+            // And store this in currentBaseAdr
+            UnsafeBins b = (UnsafeBins) getBinFromAddr(chunkAdr);
+            this.currentBaseAdr = b.binAddr + b.findOffsetForChunkId(AddrAlign.getBinId(chunkAdr));
+            this.currentOffset = 0;
+            this.remaining = b.chunkSize;
+        }
+    }
+
+    class LoadContext {
+
+        private long currentChunkAdr;
+        private long currentBaseAdr;
+        private int currentOffset;
+        private int remaining;
+
+        public LoadContext(long firstChunkAdr) {
+            beginNewChunk(firstChunkAdr);
+            // Store size
+            this.remaining = loadInt();
+        }
+
+        public int loadInt() {
+            int res = unsafe.getInt(this.currentBaseAdr + this.currentOffset);
+            this.currentOffset += Primitive.INT_SIZE;
+            this.remaining -= Primitive.INT_SIZE;
+            return res;
+        }
+
+        public void loadInt(Object object, long offset) {
+            int byteRemaining = Primitive.INT_SIZE;
+            do {
+                int byteToCopy = (byteRemaining > remaining) ? remaining : byteRemaining;
+                int d = unsafe.getInt(this.currentBaseAdr + this.currentOffset);
+                // FIXME WHY DIRECT MEMORY DON'T WORK !!!!!!!!!! (throw illegalArgument)
+                //unsafe.copyMemory(null, this.currentBaseAdr + this.currentOffset, object, offset, byteToCopy);
+                unsafe.putInt(object, offset, d);
+                byteRemaining -= byteToCopy;
+                this.currentOffset += byteToCopy;
+                this.remaining -= byteToCopy;
+                if (this.remaining == 0) {
+                    // Get next chunk address in last 4 byte
+                    beginNewChunk(unsafe.getInt(this.currentBaseAdr + this.currentOffset));
+                }
+            } while (byteRemaining > 0);
+        }
+
+        private void beginNewChunk(long chunkAdr) {
+            this.currentChunkAdr = chunkAdr;
+            // get bins
+            // FIXME Suport only unsafebin
+            // Get baseAdr of allocated memory
+            // Get baseOffset of chunk
+            // And store this in currentBaseAdr
+            UnsafeBins b = (UnsafeBins) getBinFromAddr(chunkAdr);
+            this.currentBaseAdr = b.binAddr + b.findOffsetForChunkId(AddrAlign.getBinId(chunkAdr));
+            this.currentOffset = 0;
+            this.remaining = b.chunkSize;
+        }
     }
 }
