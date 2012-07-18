@@ -8,16 +8,15 @@ import java.nio.ByteBuffer;
 public class BenchUnsafePrimitiveBeanSerializer {
 
     @Test
-    public void bench_ser_deser_simple_bean() {
+    public void bench_ser_simple_int_bean() {
         Allocator a = new Allocator(50 * 1024 * 1024, true);
-
-
         int NB_MSG_WRITE = 10000000;
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer(a.getStoreContext(a.alloc(9 * 4), 9 * 4));
-        LotOfInt c = new LotOfInt();
+        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Allocator.StoreContext sc = a.getStoreContext(a.alloc(9 * 4), 9 * 4);
+        LotOfInt c = new LotOfInt(42);
         long start = System.nanoTime();
         for (int i = 0; i < NB_MSG_WRITE; i++) {
-            pbs.serialize(c);
+            pbs.serialize(c, sc);
         }
         long time = System.nanoTime() - start;
         System.out.println("Write End in " + time / 1000 / 1000 + " ms");
@@ -28,5 +27,108 @@ public class BenchUnsafePrimitiveBeanSerializer {
 
     }
 
+    @Test
+    public void bench_deser_simple_int_bean() {
+        Allocator a = new Allocator(1 * 1024 * 1024, true);
+        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        long addr = a.alloc(9 * 4);
+        // Serialize
+        Allocator.StoreContext sc = a.getStoreContext(addr, 9 * 4);
+        LotOfInt c = new LotOfInt(10);
+        pbs.serialize(c, sc);
+
+        // Deser
+        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LotOfInt res = new LotOfInt(0);
+
+        long start = System.nanoTime();
+        int NB_MSG_READ = 10000000;
+        for (int i = 0; i < NB_MSG_READ; i++) {
+            pbs.deserialize(res, lc);
+        }
+        long time = System.nanoTime() - start;
+        System.out.println("Read End in " + time / 1000 / 1000 + " ms");
+        System.out.println("Read Throughput " + ((double) (9 * 4 * NB_MSG_READ / 1024 / 1024)) / ((double) time / 1000d / 1000d / 1000d) + " MB/s");
+        System.out.println("Allocated memory : " + a.getAllocatedMemory() / 1024 / 1024 + " MB");
+        System.out.println("Used memory : " + a.getUsedMemory() / 1024 / 1024 + " MB");
+        System.out.println("Allocations : " + a.getNbAllocation());
+    }
+
+
+    @Test
+    public void bench_ser_simple_bean() {
+        Allocator a = new Allocator(50 * 1024 * 1024, true);
+        int NB_MSG_WRITE = 1000000;
+        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        LotOfPrimitive c = new LotOfPrimitive();
+        int serSize = pbs.estimateSize(c);
+        System.out.println("Serialized size: " + serSize);
+        Allocator.StoreContext sc = a.getStoreContext(a.alloc(serSize), serSize);
+
+        long start = System.nanoTime();
+        for (int i = 0; i < NB_MSG_WRITE; i++) {
+            pbs.serialize(c, sc);
+        }
+        long time = System.nanoTime() - start;
+        System.out.println("Write End in " + time / 1000 / 1000 + " ms");
+        System.out.println("Write Throughput " + ((double) (serSize * NB_MSG_WRITE / 1024 / 1024)) / ((double) time / 1000d / 1000d / 1000d) + " MB/s");
+        System.out.println("Allocated memory : " + a.getAllocatedMemory() / 1024 / 1024 + " MB");
+        System.out.println("Used memory : " + a.getUsedMemory() / 1024 / 1024 + " MB");
+        System.out.println("Allocations : " + a.getNbAllocation());
+    }
+
+    @Test
+    public void bench_deser_simple_bean() {
+        Allocator a = new Allocator(1 * 1024 * 1024, true);
+        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        LotOfPrimitive c = new LotOfPrimitive();
+        int serSize = pbs.estimateSize(c);
+        long addr = a.alloc(serSize);
+        // Serialize
+        Allocator.StoreContext sc = a.getStoreContext(addr, serSize);
+
+        pbs.serialize(c, sc);
+
+        // Deser
+        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LotOfPrimitive res = new LotOfPrimitive();
+
+        long start = System.nanoTime();
+        int NB_MSG_READ = 1000000;
+        for (int i = 0; i < NB_MSG_READ; i++) {
+            pbs.deserialize(res, lc);
+        }
+        long time = System.nanoTime() - start;
+        System.out.println("Read End in " + time / 1000 / 1000 + " ms");
+        System.out.println("Read Throughput " + ((double) (serSize * NB_MSG_READ / 1024 / 1024)) / ((double) time / 1000d / 1000d / 1000d) + " MB/s");
+        System.out.println("Allocated memory : " + a.getAllocatedMemory() / 1024 / 1024 + " MB");
+        System.out.println("Used memory : " + a.getUsedMemory() / 1024 / 1024 + " MB");
+        System.out.println("Allocations : " + a.getNbAllocation());
+    }
+
+    @Test
+    public void bench_alloc_ser_deser_simple_bean() {
+        Allocator a = new Allocator(500 * 1024 * 1024, true);
+        int NB_MSG_WRITE = 1000000;
+        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        LotOfPrimitive c = new LotOfPrimitive();
+        int serSize = pbs.estimateSize(c);
+        long start = System.nanoTime();
+        for (int i = 0; i < NB_MSG_WRITE; i++) {
+            int intSerSize = pbs.estimateSize(c);
+            long addr = a.alloc(intSerSize);
+            Allocator.StoreContext sc = a.getStoreContext(addr, intSerSize);
+            pbs.serialize(c, sc);
+            LotOfPrimitive res = new LotOfPrimitive();
+            Allocator.LoadContext lc = a.getLoadContext(addr);
+            pbs.deserialize(res, lc);
+        }
+        long time = System.nanoTime() - start;
+        System.out.println("Write End in " + time / 1000 / 1000 + " ms");
+        System.out.println("Write Throughput " + ((double) (serSize * NB_MSG_WRITE / 1024 / 1024)) / ((double) time / 1000d / 1000d / 1000d) + " MB/s");
+        System.out.println("Allocated memory : " + a.getAllocatedMemory() / 1024 / 1024 + " MB");
+        System.out.println("Used memory : " + a.getUsedMemory() / 1024 / 1024 + " MB");
+        System.out.println("Allocations : " + a.getNbAllocation());
+    }
 
 }

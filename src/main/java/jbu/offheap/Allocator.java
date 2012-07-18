@@ -280,13 +280,38 @@ public class Allocator implements AllocatorMBean {
             this.remaining -= Primitive.INT_SIZE;
         }
 
+        public void storeBoolean(Object object, long offset) {
+            storeSomething(object, offset, Primitive.BOOLEAN_SIZE);
+        }
+
+        public void storeChar(Object object, long offset) {
+            storeSomething(object, offset, Primitive.CHAR_SIZE);
+        }
+
+        public void storeByte(Object object, long offset) {
+            storeSomething(object, offset, Primitive.BYTE_SIZE);
+        }
+
+        public void storeShort(Object object, long offset) {
+            storeSomething(object, offset, Primitive.SHORT_SIZE);
+        }
+
         public void storeInt(Object object, long offset) {
             storeSomething(object, offset, Primitive.INT_SIZE);
+        }
+
+        public void storeLong(Object object, long offset) {
+            storeSomething(object, offset, Primitive.LONG_SIZE);
+        }
+
+        public void storeFloat(Object object, long offset) {
+            storeSomething(object, offset, Primitive.FLOAT_SIZE);
         }
 
         public void storeDouble(Object object, long offset) {
             storeSomething(object, offset, Primitive.DOUBLE_SIZE);
         }
+
 
         private void storeSomething(Object object, long offset, int byteRemaining) {
             do {
@@ -337,8 +362,39 @@ public class Allocator implements AllocatorMBean {
             return res;
         }
 
+        public void loadBoolean(Object object, long offset) {
+            loadSomething(object, offset, Primitive.BOOLEAN_SIZE);
+        }
+
+        public void loadChar(Object object, long offset) {
+            loadSomething(object, offset, Primitive.CHAR_SIZE);
+        }
+
+        public void loadByte(Object object, long offset) {
+            loadSomething(object, offset, Primitive.BYTE_SIZE);
+        }
+
+        public void loadShort(Object object, long offset) {
+            loadSomething(object, offset, Primitive.SHORT_SIZE);
+        }
+
         public void loadInt(Object object, long offset) {
-            int byteRemaining = Primitive.INT_SIZE;
+            loadSomething(object, offset, Primitive.INT_SIZE);
+        }
+
+        public void loadLong(Object object, long offset) {
+            loadSomething(object, offset, Primitive.LONG_SIZE);
+        }
+
+        public void loadFloat(Object object, long offset) {
+            loadSomething(object, offset, Primitive.FLOAT_SIZE);
+        }
+
+        public void loadDouble(Object object, long offset) {
+            loadSomething(object, offset, Primitive.DOUBLE_SIZE);
+        }
+
+        private void loadSomething(Object object, long offset, int byteRemaining) {
             do {
                 int byteToCopy = (byteRemaining > remaining) ? remaining : byteRemaining;
                 int d = unsafe.getInt(this.currentBaseAdr + this.currentOffset);
