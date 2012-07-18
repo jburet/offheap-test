@@ -30,15 +30,14 @@ public class Allocator implements AllocatorMBean {
 
 
     public Allocator(int maxMemory, boolean unsafe) {
-        constructWithLogScale(maxMemory, 16, unsafe);
+        constructWithLogScale(maxMemory, 1, unsafe);
     }
 
     private void constructWithLogScale(int initialMemory, int maxBins, boolean unsafe) {
         // Construct scale
-        // Always start from 128 Bytes
 
         int binsSize = initialMemory / maxBins;
-        int currentChunkSize = 32;
+        int currentChunkSize = 64;
 
         for (int i = 0; i < maxBins; i++) {
             Bins bbb;
@@ -77,11 +76,25 @@ public class Allocator implements AllocatorMBean {
             long chunkAddr = usedBin.getValue().allocateOneChunk();
 
             // If no chunk available
-            while (chunkAddr < 0) {
-                // take just lower bins and try to allocated
-                usedBin = binsBySize.lowerEntry(usedBin.getKey());
-                chunkAddr = usedBin.getValue().allocateOneChunk();
+            // Try to take a inferior chunk if not available superior chunk and two inf chunk two sup chunk etc...
+            if (chunkAddr < 0) {
+                Map.Entry<Integer, Bins> currentBin = usedBin;
+                // take inf
+                currentBin = binsBySize.lowerEntry(currentBin.getKey());
+                if (currentBin != null) {
+                    chunkAddr = currentBin.getValue().allocateOneChunk();
+                }
             }
+
+            if (chunkAddr < 0) {
+                Map.Entry<Integer, Bins> currentBin = usedBin;
+                // take inf
+                currentBin = binsBySize.higherEntry(currentBin.getKey());
+                if (currentBin != null) {
+                    chunkAddr = currentBin.getValue().allocateOneChunk();
+                }
+            }
+
 
             // update next chunk of previous element
             if (previousChunkAddr > 0) {
@@ -248,7 +261,7 @@ public class Allocator implements AllocatorMBean {
         return nbFree.longValue();
     }
 
-    class StoreContext {
+    public class StoreContext {
 
         private long currentChunkAdr;
         private long currentBaseAdr;
@@ -268,7 +281,14 @@ public class Allocator implements AllocatorMBean {
         }
 
         public void storeInt(Object object, long offset) {
-            int byteRemaining = Primitive.INT_SIZE;
+            storeSomething(object, offset, Primitive.INT_SIZE);
+        }
+
+        public void storeDouble(Object object, long offset) {
+            storeSomething(object, offset, Primitive.DOUBLE_SIZE);
+        }
+
+        private void storeSomething(Object object, long offset, int byteRemaining) {
             do {
                 int byteToCopy = (remaining > byteRemaining) ? byteRemaining : remaining;
                 byteRemaining -= byteToCopy;
@@ -297,7 +317,7 @@ public class Allocator implements AllocatorMBean {
         }
     }
 
-    class LoadContext {
+    public class LoadContext {
 
         private long currentChunkAdr;
         private long currentBaseAdr;

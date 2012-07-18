@@ -13,7 +13,7 @@ public class UnsafeBins extends Bins implements UnsafeBinsMBean {
     private long arrayBaseOffset = (long) unsafe.arrayBaseOffset(byte[].class);
 
     // Unsafe instanciation
-    private static final Unsafe unsafe = getUnsafeInstance();
+    private static final Unsafe unsafe = UnsafeUtil.unsafe;
 
     // Method for get address of a direct byte buffer
     private final static Field bufferAddr;
@@ -26,19 +26,6 @@ public class UnsafeBins extends Bins implements UnsafeBinsMBean {
             // Never append ??
             throw new RuntimeException("Cannot use UnsafeBins in this JVM", e);
         }
-    }
-
-    private static Unsafe getUnsafeInstance() {
-        try {
-            Field theUnsafeInstance = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafeInstance.setAccessible(true);
-            return (Unsafe) theUnsafeInstance.get(Unsafe.class);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        return null;
     }
 
     final long binAddr;

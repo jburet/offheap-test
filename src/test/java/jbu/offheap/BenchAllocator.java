@@ -28,7 +28,7 @@ public class BenchAllocator {
         byte[] data = new byte[100];
         List<Long> chunks = new ArrayList<Long>();
 
-        Allocator a = new Allocator(100 * 1024 * 1024, false);
+        Allocator a = new Allocator(10 * 1024 * 1024, false);
         for (int i = 0; i < 100000; i++) {
             long start = System.nanoTime();
             long firstChunk = a.alloc(100);

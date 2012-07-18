@@ -50,11 +50,16 @@ public abstract class Bins {
     }
 
     long allocateOneChunk() {
-        int chunkOffset = this.chunkOffset.get();
-        for (int i = 0; i < this.size; i++) {
-            int currentChunkIndex = (i + chunkOffset) % this.size;
-            if (chunks.compareAndSet(currentChunkIndex, FREE, USED)) {
-                return AddrAlign.constructAddr(baseAddr, currentChunkIndex);
+        // Check if they are some chunk free
+        if (occupation.get() < size) {
+            int chunkOffset = this.chunkOffset.get();
+            for (int i = 0; i < this.size; i++) {
+                int currentChunkIndex = (i + chunkOffset) % this.size;
+                if (chunks.compareAndSet(currentChunkIndex, FREE, USED)) {
+                    this.chunkOffset.set(chunkOffset + i +1);
+                    occupation.incrementAndGet();
+                    return AddrAlign.constructAddr(baseAddr, currentChunkIndex);
+                }
             }
         }
         // Cannot allocate one chunk
