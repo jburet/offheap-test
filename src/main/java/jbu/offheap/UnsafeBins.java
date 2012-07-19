@@ -47,7 +47,7 @@ public class UnsafeBins extends Bins implements UnsafeBinsMBean {
 
         // put the length
         unsafe.putInt(baseAddr, length);
-
+        // FIXME Who is this 4 ? Use constant
         long dstAddr = baseAddr + 4;
         long offset = arrayBaseOffset;
         while (length > 0) {
@@ -73,6 +73,7 @@ public class UnsafeBins extends Bins implements UnsafeBinsMBean {
 
                 // put the length
                 unsafe.putInt(baseAddr, length);
+                // FIXME Who is this 4 ?
                 long dstAddr = baseAddr + 4;
                 // put data from source position
                 unsafe.copyMemory(dataAddr + (data.position() << 0), dstAddr, length);

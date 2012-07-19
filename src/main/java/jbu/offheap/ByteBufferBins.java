@@ -45,6 +45,7 @@ public class ByteBufferBins extends Bins implements ByteBufferBinsMBean {
         int baseAddr = findOffsetForChunkId(chunkId);
         bb.putInt(baseAddr, length);
         for (int i = 0; i < length; i++) {
+            // FIXME Who is this 4 ? Chunk size ?
             bb.put(baseAddr + 4 + i, data[i + currentOffset]);
         }
         return true;
@@ -56,6 +57,7 @@ public class ByteBufferBins extends Bins implements ByteBufferBinsMBean {
         int baseAddr = findOffsetForChunkId(chunkId);
         int dataLength = (data.remaining() > this.chunkSize) ? this.chunkSize : data.remaining();
         for (int i = 0; i < dataLength; i++) {
+            // FIXME Who is this 4
             bb.put(baseAddr + 4 + i, data.get());
         }
         return true;
@@ -73,6 +75,7 @@ public class ByteBufferBins extends Bins implements ByteBufferBinsMBean {
         int size = bb.getInt(baseAddr);
         byte[] data = new byte[size];
         for (int i = 0; i < size; i++) {
+            // FIXME Who is this 4
             data[i] = bb.get(baseAddr + 4 + i);
         }
         return data;
@@ -119,6 +122,7 @@ public class ByteBufferBins extends Bins implements ByteBufferBinsMBean {
     @Override
     public void setNextChunkId(int currentChunkId, long nextChunkId) {
         // Set nextChunkId to last 8 bytes of currentChunkId
+        // FIXME Who is this 4
         int nextChunkOffset = findOffsetForChunkId(currentChunkId) + chunkSize + 4;
         bb.putLong(nextChunkOffset, nextChunkId);
     }
@@ -126,6 +130,7 @@ public class ByteBufferBins extends Bins implements ByteBufferBinsMBean {
     @Override
     public long getNextChunkId(int currentChunkId) {
         // Set nextChunkId to last 8 bytes of currentChunkId
+        // FIXME Who is this 4
         int nextChunkOffset = findOffsetForChunkId(currentChunkId) + chunkSize + 4;
         return bb.getLong(nextChunkOffset);
     }

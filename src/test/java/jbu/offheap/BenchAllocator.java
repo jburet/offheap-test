@@ -28,7 +28,7 @@ public class BenchAllocator {
         byte[] data = new byte[100];
         List<Long> chunks = new ArrayList<Long>();
 
-        Allocator a = new Allocator(10 * 1024 * 1024, false);
+        Allocator a = new Allocator(10 * 1024 * 1024);
         for (int i = 0; i < 100000; i++) {
             long start = System.nanoTime();
             long firstChunk = a.alloc(100);
@@ -101,7 +101,7 @@ public class BenchAllocator {
         List<Long> refs = new ArrayList<Long>();
 
         // Use a 100 MB cache
-        Allocator a = new Allocator(400 * 1024 * 1024, true);
+        Allocator a = new Allocator(400 * 1024 * 1024);
         a.registerInMBeanServer(mbs);
 
         // the bench
@@ -167,7 +167,7 @@ public class BenchAllocator {
     @Test
     public void multi_thread_bench() {
         // Use a 100 MB cache
-        Allocator a = new Allocator(800 * 1024 * 1024, true);
+        Allocator a = new Allocator(800 * 1024 * 1024);
         a.registerInMBeanServer(mbs);
 
         AllocRunnable ar1 = new AllocRunnable(a);

@@ -83,4 +83,23 @@ public class UnsafeReflection {
         return offset;
     }
 
+    public static int[] getArrayLength(Object obj, long offset, short arrayProof) {
+        // FIXME work only in array with dim = 1
+        // FIXME JVM and JVM version dependent code... find best solution
+        // 3 case
+        // 32 bits : size 8 - 12
+        // 64 bits : size 16 - 20 + padding
+        // 64 bits w pc : size 12 - 16
+        Object array = unsafe.getObject(obj, offset);
+        int abo = unsafe.arrayBaseOffset(array.getClass());
+        int lengthOff = 0;
+        if (abo == 12) {
+            lengthOff = 8;
+        } else if (abo == 16) {
+            lengthOff = 12;
+        } else if (abo == 24) {
+            lengthOff = 16;
+        }
+        return new int[]{unsafe.getInt(array, lengthOff)};
+    }
 }

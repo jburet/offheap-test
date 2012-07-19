@@ -2,7 +2,6 @@ package jbu.serializer;
 
 
 import jbu.offheap.Allocator;
-import jbu.offheap.Primitive;
 import jbu.offheap.UnsafeUtil;
 import sun.misc.Unsafe;
 
@@ -18,12 +17,12 @@ public class UnsafePrimitiveBeanSerializer {
     public static ClassDesc registerClass(Class c) {
         Field[] fields = c.getDeclaredFields();
         long[] offsets = new long[fields.length];
-        int[] types = new int[fields.length];
+        Type[] types = new Type[fields.length];
         for (int i = 0; i < fields.length; i++) {
             Field f = fields[i];
             f.setAccessible(true);
             offsets[i] = unsafe.objectFieldOffset(f);
-            types[i] = ClassDesc.resolveType(f);
+            types[i] = Type.resolveType(f);
         }
         registeredClassOffset.put(c, new ClassDesc(types, offsets));
         return registeredClassOffset.get(c);
@@ -36,22 +35,11 @@ public class UnsafePrimitiveBeanSerializer {
             cd = registerClass(clazz);
         }
         for (int i = 0; i < cd.nbFields; i++) {
-            if (cd.types[i] == ClassDesc.BOOLEAN) {
-                sc.storeBoolean(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.CHAR) {
-                sc.storeChar(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.BYTE) {
-                sc.storeByte(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.SHORT) {
-                sc.storeShort(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.INT) {
-                sc.storeInt(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.LONG) {
-                sc.storeLong(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.FLOAT) {
-                sc.storeFloat(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.DOUBLE) {
-                sc.storeDouble(obj, cd.offsets[i]);
+            if (cd.types[i].isArray) {
+                int[] arrayLength = UnsafeReflection.getArrayLength(obj, cd.offsets[i], cd.types[i].arrayProof);
+                sc.storeSomething(obj, cd.offsets[i], cd.types[i].getLength(arrayLength));
+            } else {
+                sc.storeSomething(obj, cd.offsets[i], cd.types[i].getLength());
             }
         }
     }
@@ -63,22 +51,11 @@ public class UnsafePrimitiveBeanSerializer {
             cd = registerClass(clazz);
         }
         for (int i = 0; i < cd.nbFields; i++) {
-            if (cd.types[i] == ClassDesc.BOOLEAN) {
-                //lc.loadInt(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.CHAR) {
-                //lc.loadChar(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.BYTE) {
-                //lc.loadByte(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.SHORT) {
-                //lc.loadShort(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.INT) {
-                lc.loadInt(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.LONG) {
-                //lc.loadLong(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.FLOAT) {
-                //lc.loadFloat(obj, cd.offsets[i]);
-            } else if (cd.types[i] == ClassDesc.DOUBLE) {
-                //lc.loadDouble(obj, cd.offsets[i]);
+            if (cd.types[i].isArray) {
+                int[] arrayLength = UnsafeReflection.getArrayLength(obj, cd.offsets[i], cd.types[i].arrayProof);
+                lc.loadSomething(obj, cd.offsets[i], cd.types[i], cd.types[i].getLength(arrayLength));
+            } else {
+                lc.loadSomething(obj, cd.offsets[i], cd.types[i], cd.types[i].getLength());
             }
         }
     }
@@ -91,29 +68,15 @@ public class UnsafePrimitiveBeanSerializer {
         }
         int size = 0;
         for (int i = 0; i < cd.nbFields; i++) {
-            size += getFieldSize(cd.types[i], obj);
+            // FIXME support only primitive and array
+            if (cd.types[i].isArray) {
+                int[] arrayLength = UnsafeReflection.getArrayLength(obj, cd.offsets[i], cd.types[i].arrayProof);
+                size += cd.types[i].getLength(arrayLength);
+            } else {
+                size += cd.types[i].getLength();
+            }
         }
         return size;
     }
 
-    private int getFieldSize(int type, Object obj) {
-        if (type == ClassDesc.BOOLEAN) {
-            return Primitive.BOOLEAN_SIZE;
-        } else if (type == ClassDesc.CHAR) {
-            return Primitive.CHAR_SIZE;
-        } else if (type == ClassDesc.BYTE) {
-            return Primitive.BYTE_SIZE;
-        } else if (type == ClassDesc.SHORT) {
-            return Primitive.SHORT_SIZE;
-        } else if (type == ClassDesc.INT) {
-            return Primitive.INT_SIZE;
-        } else if (type == ClassDesc.LONG) {
-            return Primitive.LONG_SIZE;
-        } else if (type == ClassDesc.FLOAT) {
-            return Primitive.FLOAT_SIZE;
-        } else if (type == ClassDesc.LONG) {
-            return Primitive.LONG_SIZE;
-        }
-        return 0;
-    }
 }

@@ -1,5 +1,6 @@
 package jbu.offheap;
 
+import jbu.serializer.Type;
 import sun.misc.Unsafe;
 
 import javax.management.*;
@@ -29,8 +30,8 @@ public class Allocator implements AllocatorMBean {
     private final AtomicLong nbFree = new AtomicLong(0);
 
 
-    public Allocator(int maxMemory, boolean unsafe) {
-        constructWithLogScale(maxMemory, 1, unsafe);
+    public Allocator(int maxMemory) {
+        constructWithLogScale(maxMemory, 1, true);
     }
 
     private void constructWithLogScale(int initialMemory, int maxBins, boolean unsafe) {
@@ -276,44 +277,12 @@ public class Allocator implements AllocatorMBean {
 
         public void storeInt(int value) {
             unsafe.putInt(this.currentBaseAdr + this.currentOffset, value);
-            this.currentOffset += Primitive.INT_SIZE;
-            this.remaining -= Primitive.INT_SIZE;
+            // FIXME 4 (int length) must be constant
+            this.currentOffset += 4;
+            this.remaining -= 4;
         }
 
-        public void storeBoolean(Object object, long offset) {
-            storeSomething(object, offset, Primitive.BOOLEAN_SIZE);
-        }
-
-        public void storeChar(Object object, long offset) {
-            storeSomething(object, offset, Primitive.CHAR_SIZE);
-        }
-
-        public void storeByte(Object object, long offset) {
-            storeSomething(object, offset, Primitive.BYTE_SIZE);
-        }
-
-        public void storeShort(Object object, long offset) {
-            storeSomething(object, offset, Primitive.SHORT_SIZE);
-        }
-
-        public void storeInt(Object object, long offset) {
-            storeSomething(object, offset, Primitive.INT_SIZE);
-        }
-
-        public void storeLong(Object object, long offset) {
-            storeSomething(object, offset, Primitive.LONG_SIZE);
-        }
-
-        public void storeFloat(Object object, long offset) {
-            storeSomething(object, offset, Primitive.FLOAT_SIZE);
-        }
-
-        public void storeDouble(Object object, long offset) {
-            storeSomething(object, offset, Primitive.DOUBLE_SIZE);
-        }
-
-
-        private void storeSomething(Object object, long offset, int byteRemaining) {
+        public void storeSomething(Object object, long offset, int byteRemaining) {
             do {
                 int byteToCopy = (remaining > byteRemaining) ? byteRemaining : remaining;
                 byteRemaining -= byteToCopy;
@@ -357,50 +326,22 @@ public class Allocator implements AllocatorMBean {
 
         public int loadInt() {
             int res = unsafe.getInt(this.currentBaseAdr + this.currentOffset);
-            this.currentOffset += Primitive.INT_SIZE;
-            this.remaining -= Primitive.INT_SIZE;
+            // FIXME 4 (int length) must be constant
+            this.currentOffset += 4;
+            this.remaining -= 4;
             return res;
         }
 
-        public void loadBoolean(Object object, long offset) {
-            loadSomething(object, offset, Primitive.BOOLEAN_SIZE);
-        }
-
-        public void loadChar(Object object, long offset) {
-            loadSomething(object, offset, Primitive.CHAR_SIZE);
-        }
-
-        public void loadByte(Object object, long offset) {
-            loadSomething(object, offset, Primitive.BYTE_SIZE);
-        }
-
-        public void loadShort(Object object, long offset) {
-            loadSomething(object, offset, Primitive.SHORT_SIZE);
-        }
-
-        public void loadInt(Object object, long offset) {
-            loadSomething(object, offset, Primitive.INT_SIZE);
-        }
-
-        public void loadLong(Object object, long offset) {
-            loadSomething(object, offset, Primitive.LONG_SIZE);
-        }
-
-        public void loadFloat(Object object, long offset) {
-            loadSomething(object, offset, Primitive.FLOAT_SIZE);
-        }
-
-        public void loadDouble(Object object, long offset) {
-            loadSomething(object, offset, Primitive.DOUBLE_SIZE);
-        }
-
-        private void loadSomething(Object object, long offset, int byteRemaining) {
+        // FIXME NOT USE IT .... NYI (Not yet implemented)
+        public void loadSomething2(Object object, long offset, int byteRemaining) {
             do {
                 int byteToCopy = (byteRemaining > remaining) ? remaining : byteRemaining;
-                int d = unsafe.getInt(this.currentBaseAdr + this.currentOffset);
+                //int d = unsafe.getInt(this.currentBaseAdr + this.currentOffset);
                 // FIXME WHY DIRECT MEMORY DON'T WORK !!!!!!!!!! (throw illegalArgument)
-                //unsafe.copyMemory(null, this.currentBaseAdr + this.currentOffset, object, offset, byteToCopy);
-                unsafe.putInt(object, offset, d);
+                // FIXME Marked as NotYetImplemented in code work only if destination are primitive array
+                // See http://mail.openjdk.java.net/pipermail/hotspot-runtime-dev/2012-March/003322.html
+                unsafe.copyMemory(null, this.currentBaseAdr + this.currentOffset, object, offset, byteToCopy);
+                //unsafe.putInt(object, offset, d);
                 byteRemaining -= byteToCopy;
                 this.currentOffset += byteToCopy;
                 this.remaining -= byteToCopy;
@@ -409,6 +350,68 @@ public class Allocator implements AllocatorMBean {
                     beginNewChunk(unsafe.getInt(this.currentBaseAdr + this.currentOffset));
                 }
             } while (byteRemaining > 0);
+        }
+
+        // loadSomething2 has a better impl, but working only when jdk7 are really fully implemented...
+        // Workaround for copy memory
+        // Allocate tmpbuffer in offheap .. and read with typed method of unsafe
+        public void loadSomething(Object dest, long destOffset, Type type, int byteRemaining) {
+            // allocate buffer
+            long tmpAddr = unsafe.allocateMemory(byteRemaining);
+            try {
+                int offset = 0;
+                do {
+                    int byteToCopy = (byteRemaining > remaining) ? remaining : byteRemaining;
+                    unsafe.copyMemory(this.currentBaseAdr + this.currentOffset, tmpAddr + offset, byteToCopy);
+                    byteRemaining -= byteToCopy;
+                    this.currentOffset += byteToCopy;
+                    this.remaining -= byteToCopy;
+                    if (this.remaining == 0) {
+                        // Get next chunk address in last 4 byte
+                        beginNewChunk(unsafe.getInt(this.currentBaseAdr + this.currentOffset));
+                    }
+                    offset += byteToCopy;
+                } while (byteRemaining > 0);
+                // Ok now write to heap
+                if (!type.isArray) {
+                    if (type.equals(Type.BOOLEAN)) {
+                        boolean b = unsafe.getBoolean(null, tmpAddr);
+                        unsafe.putBoolean(dest, destOffset, b);
+                    }
+                    if (type.equals(Type.CHAR)) {
+                        char c = unsafe.getChar(tmpAddr);
+                        unsafe.putChar(dest, destOffset, c);
+                    }
+                    if (type.equals(Type.BYTE)) {
+                        byte b = unsafe.getByte(tmpAddr);
+                        unsafe.putByte(dest, destOffset, b);
+                    }
+                    if (type.equals(Type.SHORT)) {
+                        short s = unsafe.getShort(tmpAddr);
+                        unsafe.putShort(dest, destOffset, s);
+                    }
+                    if (type.equals(Type.INT)) {
+                        int i = unsafe.getInt(tmpAddr);
+                        unsafe.putInt(dest, destOffset, i);
+                    }
+                    if (type.equals(Type.LONG)) {
+                        long l = unsafe.getLong(tmpAddr);
+                        unsafe.putLong(dest, destOffset, l);
+                    }
+                    if (type.equals(Type.FLOAT)) {
+                        float f = unsafe.getFloat(tmpAddr);
+                        unsafe.putFloat(dest, destOffset, f);
+                    }
+                    if (type.equals(Type.DOUBLE)) {
+                        double d = unsafe.getDouble(tmpAddr);
+                        unsafe.putDouble(dest, destOffset, d);
+                    }
+                }
+            } finally {
+                // In all case unallocate buffer
+                unsafe.freeMemory(tmpAddr);
+            }
+
         }
 
         private void beginNewChunk(long chunkAdr) {

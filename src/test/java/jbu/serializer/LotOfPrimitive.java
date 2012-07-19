@@ -74,4 +74,90 @@ public class LotOfPrimitive {
     private double d7 = 42.0;
     private double d8 = 42.0;
 
+    public LotOfPrimitive(boolean someValueZero) {
+        if (someValueZero) {
+            b1 = false;
+            c1 = 'z';
+            by1 = 0;
+            s1 = 0;
+            i1 = 0;
+            l1 = 0;
+            f1 = 0f;
+            d1 = 0.0;
+        }
+    }
+
+    public LotOfPrimitive() {
+
+    }
+
+    @Override
+    public String toString() {
+        return "LotOfPrimitive{" +
+                "b1=" + b1 +
+                ", b2=" + b2 +
+                ", b3=" + b3 +
+                ", b4=" + b4 +
+                ", b5=" + b5 +
+                ", b6=" + b6 +
+                ", b7=" + b7 +
+                ", b8=" + b8 +
+                ", c1=" + c1 +
+                ", c2=" + c2 +
+                ", c3=" + c3 +
+                ", c4=" + c4 +
+                ", c5=" + c5 +
+                ", c6=" + c6 +
+                ", c7=" + c7 +
+                ", c8=" + c8 +
+                ", by1=" + by1 +
+                ", by2=" + by2 +
+                ", by3=" + by3 +
+                ", by4=" + by4 +
+                ", by5=" + by5 +
+                ", by6=" + by6 +
+                ", by7=" + by7 +
+                ", by8=" + by8 +
+                ", s1=" + s1 +
+                ", s2=" + s2 +
+                ", s3=" + s3 +
+                ", s4=" + s4 +
+                ", s5=" + s5 +
+                ", s6=" + s6 +
+                ", s7=" + s7 +
+                ", s8=" + s8 +
+                ", i1=" + i1 +
+                ", i2=" + i2 +
+                ", i3=" + i3 +
+                ", i4=" + i4 +
+                ", i5=" + i5 +
+                ", i6=" + i6 +
+                ", i7=" + i7 +
+                ", i8=" + i8 +
+                ", l1=" + l1 +
+                ", l2=" + l2 +
+                ", l3=" + l3 +
+                ", l4=" + l4 +
+                ", l5=" + l5 +
+                ", l6=" + l6 +
+                ", l7=" + l7 +
+                ", l8=" + l8 +
+                ", f1=" + f1 +
+                ", f2=" + f2 +
+                ", f3=" + f3 +
+                ", f4=" + f4 +
+                ", f5=" + f5 +
+                ", f6=" + f6 +
+                ", f7=" + f7 +
+                ", f8=" + f8 +
+                ", d1=" + d1 +
+                ", d2=" + d2 +
+                ", d3=" + d3 +
+                ", d4=" + d4 +
+                ", d5=" + d5 +
+                ", d6=" + d6 +
+                ", d7=" + d7 +
+                ", d8=" + d8 +
+                '}';
+    }
 }

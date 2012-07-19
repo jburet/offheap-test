@@ -1,5 +1,6 @@
 package jbu.offheap;
 
+import jbu.serializer.Type;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -15,7 +16,7 @@ public class TestAllocator {
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
         }
-        Allocator allocator = new Allocator(10 * 1024 * 1024, false);
+        Allocator allocator = new Allocator(10 * 1024 * 1024);
         long firstChunk = allocator.alloc(10);
         allocator.store(firstChunk, data);
         byte[] dataRes = allocator.load(firstChunk);
@@ -28,7 +29,7 @@ public class TestAllocator {
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
         }
-        Allocator allocator = new Allocator(10 * 1024 * 1024, false);
+        Allocator allocator = new Allocator(10 * 1024 * 1024);
         long firstChunk = allocator.alloc(1500);
         allocator.store(firstChunk, data);
         byte[] dataRes = allocator.load(firstChunk);
@@ -41,7 +42,7 @@ public class TestAllocator {
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
         }
-        Allocator allocator = new Allocator(10 * 1024 * 1024, false);
+        Allocator allocator = new Allocator(10 * 1024 * 1024);
         long firstChunk = allocator.alloc(123456);
         allocator.store(firstChunk, data);
         byte[] dataRes = allocator.load(firstChunk);
@@ -57,7 +58,7 @@ public class TestAllocator {
         ByteBuffer bb = ByteBuffer.allocateDirect(data.length);
         bb.put(data);
         bb.flip();
-        Allocator allocator = new Allocator(10 * 1024 * 1024, true);
+        Allocator allocator = new Allocator(10 * 1024 * 1024);
         long firstChunk = allocator.alloc(123456);
         allocator.store(firstChunk, bb);
         byte[] dataRes = allocator.load(firstChunk);
@@ -67,7 +68,7 @@ public class TestAllocator {
     @Test
     public void test_unsafe_store_int() {
         int a = 42;
-        Allocator allocator = new Allocator(1 * 1024, true);
+        Allocator allocator = new Allocator(1 * 1024);
         long firstChunk = allocator.alloc(4);
         Allocator.StoreContext sc = allocator.getStoreContext(firstChunk, 4);
         sc.storeInt(a);
@@ -79,13 +80,13 @@ public class TestAllocator {
     @Test
     public void test_unsafe_store_object_with_int() throws NoSuchFieldException {
         OneInt oi = new OneInt(42);
-        Allocator allocator = new Allocator(1 * 1024, true);
+        Allocator allocator = new Allocator(1 * 1024);
         long firstChunk = allocator.alloc(4);
         Allocator.StoreContext sc = allocator.getStoreContext(firstChunk, 4);
-        sc.storeInt(oi, UnsafeUtil.unsafe.objectFieldOffset(OneInt.class.getDeclaredField("a")));
+        sc.storeSomething(oi, UnsafeUtil.unsafe.objectFieldOffset(OneInt.class.getDeclaredField("a")), 4);
         Allocator.LoadContext lc = allocator.getLoadContext(firstChunk);
         OneInt oi2 = new OneInt(0);
-        lc.loadInt(oi2, UnsafeUtil.unsafe.objectFieldOffset(OneInt.class.getDeclaredField("a")));
+        lc.loadSomething(oi2, UnsafeUtil.unsafe.objectFieldOffset(OneInt.class.getDeclaredField("a")), Type.INT, 4);
         System.out.println(oi2.a);
     }
 
