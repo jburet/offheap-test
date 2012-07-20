@@ -176,8 +176,9 @@ public class Allocator implements AllocatorMBean {
         }
     }
 
-    public StoreContext getStoreContext(long firstChunkAdr, int size) {
-        return new StoreContext(firstChunkAdr, size);
+    public StoreContext getStoreContext(long firstChunkAdr) {
+        // FIXME remove size if not used
+        return new StoreContext(firstChunkAdr);
     }
 
     public LoadContext getLoadContext(long firstChunkAdr) {
@@ -265,15 +266,19 @@ public class Allocator implements AllocatorMBean {
 
     public class StoreContext {
 
+        private long firstChunkAdr;
         private long currentChunkAdr;
         private long currentBaseAdr;
         private int currentOffset;
         private int remaining;
 
-        public StoreContext(long firstChunkAdr, int size) {
+        public StoreContext(long firstChunkAdr) {
+            this.firstChunkAdr = firstChunkAdr;
             beginNewChunk(firstChunkAdr);
-            // Store size
-            storeInt(size);
+        }
+
+        public void reuse() {
+            beginNewChunk(this.firstChunkAdr);
         }
 
         public void storeInt(int value) {
@@ -293,7 +298,7 @@ public class Allocator implements AllocatorMBean {
                 // If remaining in currentChunk == 0 load next chunk
                 if (this.remaining == 0) {
                     // Get next chunk address in last 4 byte
-                    beginNewChunk(unsafe.getInt(this.currentBaseAdr + this.currentOffset));
+                    beginNewChunk(unsafe.getLong(this.currentBaseAdr + this.currentOffset));
                 }
             } while (byteRemaining > 0);
         }
@@ -306,23 +311,32 @@ public class Allocator implements AllocatorMBean {
             // Get baseOffset of chunk
             // And store this in currentBaseAdr
             UnsafeBins b = (UnsafeBins) getBinFromAddr(chunkAdr);
-            this.currentBaseAdr = b.binAddr + b.findOffsetForChunkId(AddrAlign.getBinId(chunkAdr));
+            this.currentBaseAdr = b.binAddr + b.findOffsetForChunkId(AddrAlign.getChunkId(chunkAdr));
             this.currentOffset = 0;
             this.remaining = b.chunkSize;
+            // put the size of data in 4 first byte
+            // FIXME with store context always use full size
+            unsafe.putInt(this.currentBaseAdr + this.currentOffset, this.remaining);
+            this.currentOffset += 4;
         }
     }
 
     public class LoadContext {
 
         private long currentChunkAdr;
+        private long firstChunkAdr;
         private long currentBaseAdr;
         private int currentOffset;
         private int remaining;
 
         public LoadContext(long firstChunkAdr) {
+            this.firstChunkAdr = firstChunkAdr;
             beginNewChunk(firstChunkAdr);
-            // Store size
-            this.remaining = loadInt();
+        }
+
+
+        public void reset() {
+            beginNewChunk(this.firstChunkAdr);
         }
 
         public int loadInt() {
@@ -423,9 +437,13 @@ public class Allocator implements AllocatorMBean {
             // Get baseOffset of chunk
             // And store this in currentBaseAdr
             UnsafeBins b = (UnsafeBins) getBinFromAddr(chunkAdr);
-            this.currentBaseAdr = b.binAddr + b.findOffsetForChunkId(AddrAlign.getBinId(chunkAdr));
-            this.currentOffset = 0;
+            this.currentBaseAdr = b.binAddr + b.findOffsetForChunkId(AddrAlign.getChunkId(chunkAdr));
+            // Put the offset to 4... Don't read chunk size. Always same value as chunk size
+            // FIXME Use constant
+            this.currentOffset = 4;
             this.remaining = b.chunkSize;
+
         }
+
     }
 }

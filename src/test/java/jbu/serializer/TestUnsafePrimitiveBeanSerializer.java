@@ -11,7 +11,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(9 * 4);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr, 9 * 4);
+        Allocator.StoreContext sc = a.getStoreContext(addr);
         LotOfInt c = new LotOfInt(10);
         pbs.serialize(c, sc);
 
@@ -30,7 +30,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         int serSize = pbs.estimateSize(c);
         long addr = a.alloc(serSize);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr, serSize);
+        Allocator.StoreContext sc = a.getStoreContext(addr);
 
         pbs.serialize(c, sc);
 
@@ -49,7 +49,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         int serSize = pbs.estimateSize(c);
         long addr = a.alloc(serSize);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr, serSize);
+        Allocator.StoreContext sc = a.getStoreContext(addr);
 
         pbs.serialize(c, sc);
 
@@ -68,13 +68,32 @@ public class TestUnsafePrimitiveBeanSerializer {
         int serSize = pbs.estimateSize(c);
         long addr = a.alloc(serSize);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr, serSize);
+        Allocator.StoreContext sc = a.getStoreContext(addr);
 
         pbs.serialize(c, sc);
 
         // Deser
         Allocator.LoadContext lc = a.getLoadContext(addr);
         LotOfChar res = new LotOfChar('b');
+        pbs.deserialize(res, lc);
+        System.out.println(res);
+    }
+
+    @Test
+    public void test_ser_deser_simple_few_double_bean() {
+        Allocator a = new Allocator(1 * 1024 * 1024);
+        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        SomeDouble c = new SomeDouble(1);
+        int serSize = pbs.estimateSize(c);
+        long addr = a.alloc(serSize);
+        // Serialize
+        Allocator.StoreContext sc = a.getStoreContext(addr);
+
+        pbs.serialize(c, sc);
+
+        // Deser
+        Allocator.LoadContext lc = a.getLoadContext(addr);
+        SomeDouble res = new SomeDouble(45);
         pbs.deserialize(res, lc);
         System.out.println(res);
     }
@@ -87,7 +106,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         int serSize = pbs.estimateSize(c);
         long addr = a.alloc(serSize);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr, serSize);
+        Allocator.StoreContext sc = a.getStoreContext(addr);
 
         pbs.serialize(c, sc);
 
@@ -104,7 +123,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(16);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr, 16);
+        Allocator.StoreContext sc = a.getStoreContext(addr);
         ArrayPrimitive c = new ArrayPrimitive(new int[]{2, 4});
         pbs.serialize(c, sc);
 
