@@ -83,7 +83,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     public void test_ser_deser_simple_double_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
-        LotOfDouble c = new LotOfDouble(0);
+        LotOfDouble c = new LotOfDouble(1);
         int serSize = pbs.estimateSize(c);
         long addr = a.alloc(serSize);
         // Serialize

@@ -25,12 +25,12 @@ public class TestAllocator {
 
     @Test
     public void test_alloc_more_byte_than_chunk_size_and_store_data_should_be_reloaded() {
-        byte[] data = new byte[1500];
+        byte[] data = new byte[68];
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
         }
         Allocator allocator = new Allocator(10 * 1024 * 1024);
-        long firstChunk = allocator.alloc(1500);
+        long firstChunk = allocator.alloc(68);
         allocator.store(firstChunk, data);
         byte[] dataRes = allocator.load(firstChunk);
         assertTrue(Arrays.equals(data, dataRes));

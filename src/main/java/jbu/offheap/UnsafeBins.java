@@ -52,7 +52,7 @@ public class UnsafeBins extends Bins implements UnsafeBinsMBean {
         long offset = arrayBaseOffset;
         while (length > 0) {
             long size = (length > UNSAFE_COPY_THRESHOLD) ? UNSAFE_COPY_THRESHOLD : length;
-            unsafe.copyMemory(data, offset, null, dstAddr, size);
+            unsafe.copyMemory(data, offset+currentOffset, null, dstAddr, size);
             length -= size;
             offset += size;
             dstAddr += size;

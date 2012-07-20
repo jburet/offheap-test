@@ -87,6 +87,7 @@ public class Allocator implements AllocatorMBean {
                 }
             }
 
+            // Here try superior chunk
             if (chunkAddr < 0) {
                 Map.Entry<Integer, Bins> currentBin = usedBin;
                 // take inf
@@ -98,7 +99,7 @@ public class Allocator implements AllocatorMBean {
 
 
             // update next chunk of previous element
-            if (previousChunkAddr > 0) {
+            if (previousChunkAddr != -1) {
                 setNextChunk(previousChunkAddr, chunkAddr);
             } else {
                 // First chunk
@@ -347,7 +348,7 @@ public class Allocator implements AllocatorMBean {
                 this.remaining -= byteToCopy;
                 if (this.remaining == 0) {
                     // Get next chunk address in last 4 byte
-                    beginNewChunk(unsafe.getInt(this.currentBaseAdr + this.currentOffset));
+                    beginNewChunk(unsafe.getLong(this.currentBaseAdr + this.currentOffset));
                 }
             } while (byteRemaining > 0);
         }
@@ -368,7 +369,7 @@ public class Allocator implements AllocatorMBean {
                     this.remaining -= byteToCopy;
                     if (this.remaining == 0) {
                         // Get next chunk address in last 4 byte
-                        beginNewChunk(unsafe.getInt(this.currentBaseAdr + this.currentOffset));
+                        beginNewChunk(unsafe.getLong(this.currentBaseAdr + this.currentOffset));
                     }
                     offset += byteToCopy;
                 } while (byteRemaining > 0);
