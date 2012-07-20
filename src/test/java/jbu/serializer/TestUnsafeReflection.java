@@ -29,9 +29,18 @@ public class TestUnsafeReflection {
         assertEquals("42", UnsafeReflection.getObject(f, a));
     }
 
+    @Test
+    public void test_array_size_in_mem() throws NoSuchFieldException {
+        Field f = A.class.getDeclaredField("ar2");
+        A a = new A();
+        System.out.println(UnsafeReflection.getArraySizeInMem(a,UnsafeReflection.getOffset(f)));
+    }
+
 }
 
 class A {
     private int a = 42;
     private String b = "42";
+    private int[] ar = new int[]{1, 2};
+    private int[][] ar2 = new int[][]{{1,1},{1,1},{1,1}};
 }

@@ -24,7 +24,7 @@ public class UnsafePrimitiveBeanSerializer {
             offsets[i] = unsafe.objectFieldOffset(f);
             types[i] = Type.resolveType(f);
         }
-        registeredClassOffset.put(c, new ClassDesc(types, offsets));
+        registeredClassOffset.put(c, new ClassDesc(types, offsets, fields));
         return registeredClassOffset.get(c);
     }
 
@@ -36,8 +36,8 @@ public class UnsafePrimitiveBeanSerializer {
         }
         for (int i = 0; i < cd.nbFields; i++) {
             if (cd.types[i].isArray) {
-                int[] arrayLength = UnsafeReflection.getArrayLength(obj, cd.offsets[i], cd.types[i].arrayProof);
-                sc.storeSomething(obj, cd.offsets[i], cd.types[i].getLength(arrayLength));
+                int arrayLength = UnsafeReflection.getArraySizeInMem(obj, cd.offsets[i]);
+                sc.storeSomething(obj, cd.offsets[i], arrayLength);
             } else {
                 sc.storeSomething(obj, cd.offsets[i], cd.types[i].getLength());
             }
@@ -52,8 +52,8 @@ public class UnsafePrimitiveBeanSerializer {
         }
         for (int i = 0; i < cd.nbFields; i++) {
             if (cd.types[i].isArray) {
-                int[] arrayLength = UnsafeReflection.getArrayLength(obj, cd.offsets[i], cd.types[i].arrayProof);
-                lc.loadSomething(obj, cd.offsets[i], cd.types[i], cd.types[i].getLength(arrayLength));
+                int arrayLength = UnsafeReflection.getArraySizeInMem(obj, cd.offsets[i]);
+                lc.loadSomething2(UnsafeReflection.getObject(cd.fields[i], obj), 0, arrayLength);
             } else {
                 lc.loadSomething(obj, cd.offsets[i], cd.types[i], cd.types[i].getLength());
             }
@@ -70,8 +70,8 @@ public class UnsafePrimitiveBeanSerializer {
         for (int i = 0; i < cd.nbFields; i++) {
             // FIXME support only primitive and array
             if (cd.types[i].isArray) {
-                int[] arrayLength = UnsafeReflection.getArrayLength(obj, cd.offsets[i], cd.types[i].arrayProof);
-                size += cd.types[i].getLength(arrayLength);
+                int arrayLength = UnsafeReflection.getArraySizeInMem(obj, cd.offsets[i]);
+                size += arrayLength;
             } else {
                 size += cd.types[i].getLength();
             }

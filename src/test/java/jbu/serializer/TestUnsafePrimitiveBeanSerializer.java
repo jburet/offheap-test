@@ -124,15 +124,16 @@ public class TestUnsafePrimitiveBeanSerializer {
         long addr = a.alloc(16);
         // Serialize
         Allocator.StoreContext sc = a.getStoreContext(addr);
-        ArrayPrimitive c = new ArrayPrimitive(new int[]{2, 4});
+        ArrayPrimitive c = new ArrayPrimitive(new int[]{1, 2, 3, 4, 5, 6, 7});
         pbs.serialize(c, sc);
 
         // Deser
         Allocator.LoadContext lc = a.getLoadContext(addr);
-        ArrayPrimitive res = new ArrayPrimitive(new int[]{1, 1});
+        ArrayPrimitive res = new ArrayPrimitive(new int[]{0, 0, 0, 0, 0, 0, 0});
         pbs.deserialize(res, lc);
-        System.out.println(res.a[0] + " " + res.a[1]);
-
+        for(int i : res.a){
+            System.out.println(i);
+        }
         // estimated size
         int serSize = pbs.estimateSize(c);
     }

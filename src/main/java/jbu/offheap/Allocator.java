@@ -323,6 +323,9 @@ public class Allocator implements AllocatorMBean {
 
     public class LoadContext {
 
+        // Allocate buffer for each load is very expensive... Allocate only one and reuse
+        private long tmpAddr = unsafe.allocateMemory(8);
+
         private long currentChunkAdr;
         private long firstChunkAdr;
         private long currentBaseAdr;
@@ -337,6 +340,12 @@ public class Allocator implements AllocatorMBean {
 
         public void reset() {
             beginNewChunk(this.firstChunkAdr);
+        }
+
+        // Release allocated offheap memory during GC
+        @Override
+        protected void finalize() throws Throwable {
+            unsafe.freeMemory(tmpAddr);
         }
 
         public int loadInt() {
@@ -371,60 +380,54 @@ public class Allocator implements AllocatorMBean {
         // Workaround for copy memory
         // Allocate tmpbuffer in offheap .. and read with typed method of unsafe
         public void loadSomething(Object dest, long destOffset, Type type, int byteRemaining) {
-            // allocate buffer
-            long tmpAddr = unsafe.allocateMemory(byteRemaining);
-            try {
-                int offset = 0;
-                do {
-                    int byteToCopy = (byteRemaining > remaining) ? remaining : byteRemaining;
-                    unsafe.copyMemory(this.currentBaseAdr + this.currentOffset, tmpAddr + offset, byteToCopy);
-                    byteRemaining -= byteToCopy;
-                    this.currentOffset += byteToCopy;
-                    this.remaining -= byteToCopy;
-                    if (this.remaining == 0) {
-                        // Get next chunk address in last 4 byte
-                        beginNewChunk(unsafe.getLong(this.currentBaseAdr + this.currentOffset));
-                    }
-                    offset += byteToCopy;
-                } while (byteRemaining > 0);
-                // Ok now write to heap
-                if (!type.isArray) {
-                    if (type.equals(Type.BOOLEAN)) {
-                        boolean b = unsafe.getBoolean(null, tmpAddr);
-                        unsafe.putBoolean(dest, destOffset, b);
-                    }
-                    if (type.equals(Type.CHAR)) {
-                        char c = unsafe.getChar(tmpAddr);
-                        unsafe.putChar(dest, destOffset, c);
-                    }
-                    if (type.equals(Type.BYTE)) {
-                        byte b = unsafe.getByte(tmpAddr);
-                        unsafe.putByte(dest, destOffset, b);
-                    }
-                    if (type.equals(Type.SHORT)) {
-                        short s = unsafe.getShort(tmpAddr);
-                        unsafe.putShort(dest, destOffset, s);
-                    }
-                    if (type.equals(Type.INT)) {
-                        int i = unsafe.getInt(tmpAddr);
-                        unsafe.putInt(dest, destOffset, i);
-                    }
-                    if (type.equals(Type.LONG)) {
-                        long l = unsafe.getLong(tmpAddr);
-                        unsafe.putLong(dest, destOffset, l);
-                    }
-                    if (type.equals(Type.FLOAT)) {
-                        float f = unsafe.getFloat(tmpAddr);
-                        unsafe.putFloat(dest, destOffset, f);
-                    }
-                    if (type.equals(Type.DOUBLE)) {
-                        double d = unsafe.getDouble(tmpAddr);
-                        unsafe.putDouble(dest, destOffset, d);
-                    }
+
+            int offset = 0;
+            do {
+                int byteToCopy = (byteRemaining > remaining) ? remaining : byteRemaining;
+                unsafe.copyMemory(this.currentBaseAdr + this.currentOffset, tmpAddr + offset, byteToCopy);
+                byteRemaining -= byteToCopy;
+                this.currentOffset += byteToCopy;
+                this.remaining -= byteToCopy;
+                if (this.remaining == 0) {
+                    // Get next chunk address in last 4 byte
+                    beginNewChunk(unsafe.getLong(this.currentBaseAdr + this.currentOffset));
                 }
-            } finally {
-                // In all case unallocate buffer
-                unsafe.freeMemory(tmpAddr);
+                offset += byteToCopy;
+            } while (byteRemaining > 0);
+            // Ok now write to heap
+            if (!type.isArray) {
+                if (type.equals(Type.BOOLEAN)) {
+                    boolean b = unsafe.getBoolean(null, tmpAddr);
+                    unsafe.putBoolean(dest, destOffset, b);
+                }
+                if (type.equals(Type.CHAR)) {
+                    char c = unsafe.getChar(tmpAddr);
+                    unsafe.putChar(dest, destOffset, c);
+                }
+                if (type.equals(Type.BYTE)) {
+                    byte b = unsafe.getByte(tmpAddr);
+                    unsafe.putByte(dest, destOffset, b);
+                }
+                if (type.equals(Type.SHORT)) {
+                    short s = unsafe.getShort(tmpAddr);
+                    unsafe.putShort(dest, destOffset, s);
+                }
+                if (type.equals(Type.INT)) {
+                    int i = unsafe.getInt(tmpAddr);
+                    unsafe.putInt(dest, destOffset, i);
+                }
+                if (type.equals(Type.LONG)) {
+                    long l = unsafe.getLong(tmpAddr);
+                    unsafe.putLong(dest, destOffset, l);
+                }
+                if (type.equals(Type.FLOAT)) {
+                    float f = unsafe.getFloat(tmpAddr);
+                    unsafe.putFloat(dest, destOffset, f);
+                }
+                if (type.equals(Type.DOUBLE)) {
+                    double d = unsafe.getDouble(tmpAddr);
+                    unsafe.putDouble(dest, destOffset, d);
+                }
             }
 
         }

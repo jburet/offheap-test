@@ -101,19 +101,17 @@ public class BenchUnsafePrimitiveBeanSerializer {
 
         long start = System.nanoTime();
         int NB_MSG_READ = 1000000;
-        //for (int i = 0; i < NB_MSG_READ; i++) {
-        while(true){
+        for (int i = 0; i < NB_MSG_READ; i++) {
             pbs.deserialize(res, lc);
             // Free load context
             lc.reset();
         }
-       /* long time = System.nanoTime() - start;
+        long time = System.nanoTime() - start;
         System.out.println("Read End in " + time / 1000 / 1000 + " ms");
         System.out.println("Read Throughput " + ((double) (serSize * NB_MSG_READ / 1024 / 1024)) / ((double) time / 1000d / 1000d / 1000d) + " MB/s");
         System.out.println("Allocated memory : " + a.getAllocatedMemory() / 1024 / 1024 + " MB");
         System.out.println("Used memory : " + a.getUsedMemory() / 1024 / 1024 + " MB");
         System.out.println("Allocations : " + a.getNbAllocation());
-        */
     }
 
     @Test
@@ -139,6 +137,27 @@ public class BenchUnsafePrimitiveBeanSerializer {
         System.out.println("Allocated memory : " + a.getAllocatedMemory() / 1024 / 1024 + " MB");
         System.out.println("Used memory : " + a.getUsedMemory() / 1024 / 1024 + " MB");
         System.out.println("Allocations : " + a.getNbAllocation());
+    }
+
+    @Test
+    public void bench_alloc_ser_deser_simple_bean_inf() {
+        Allocator a = new Allocator(500 * 1024 * 1024);
+        int NB_MSG_WRITE = 1000000;
+        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        LotOfPrimitive c = new LotOfPrimitive();
+        LotOfPrimitive res = new LotOfPrimitive();
+        int serSize = pbs.estimateSize(c);
+        int intSerSize = pbs.estimateSize(c);
+        long addr = a.alloc(intSerSize);
+        Allocator.StoreContext sc = a.getStoreContext(addr);
+        Allocator.LoadContext lc = a.getLoadContext(addr);
+        while (true) {
+            pbs.serialize(c, sc);
+            pbs.deserialize(res, lc);
+            sc.reuse();
+            lc.reset();
+        }
+
     }
 
     @Test

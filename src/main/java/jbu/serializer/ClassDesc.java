@@ -6,9 +6,10 @@ public class ClassDesc {
 
     public final Type[] types;
     public final long[] offsets;
+    public final Field[] fields;
     public final int nbFields;
 
-    public ClassDesc(Type[] types, long[] offsets) {
+    public ClassDesc(Type[] types, long[] offsets, Field[] fields) {
         // Verify same length
         if (types.length != offsets.length) {
             // FIXME caracterize exception
@@ -17,5 +18,6 @@ public class ClassDesc {
         this.nbFields = types.length;
         this.types = types;
         this.offsets = offsets;
+        this.fields = fields;
     }
 }

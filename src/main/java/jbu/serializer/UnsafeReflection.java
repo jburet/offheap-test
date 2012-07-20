@@ -74,7 +74,7 @@ public class UnsafeReflection {
         return unsafe.getObject(instance, offset);
     }
 
-    private static long getOffset(Field field) {
+    public static long getOffset(Field field) {
         Long offset = null;
         if ((offset = offsetCache.get(field)) == null) {
             offset = unsafe.objectFieldOffset(field);
@@ -83,7 +83,8 @@ public class UnsafeReflection {
         return offset;
     }
 
-    public static int[] getArrayLength(Object obj, long offset, short arrayProof) {
+
+    public static int getArrayLength(Object obj, long offset) {
         // FIXME work only in array with dim = 1
         // FIXME JVM and JVM version dependent code... find best solution
         // 3 case
@@ -92,7 +93,7 @@ public class UnsafeReflection {
         // 64 bits w pc : size 12 - 16
         Object array = unsafe.getObject(obj, offset);
         int abo = unsafe.arrayBaseOffset(array.getClass());
-        int lengthOff = 0;
+        long lengthOff = 0;
         if (abo == 12) {
             lengthOff = 8;
         } else if (abo == 16) {
@@ -100,6 +101,15 @@ public class UnsafeReflection {
         } else if (abo == 24) {
             lengthOff = 16;
         }
-        return new int[]{unsafe.getInt(array, lengthOff)};
+        return unsafe.getInt(array, lengthOff);
+    }
+
+
+    public static int getArraySizeInMem(Object obj, long offset) {
+        Object array = unsafe.getObject(obj, offset);
+        int abo = unsafe.arrayBaseOffset(array.getClass());
+        int scale = unsafe.arrayIndexScale(array.getClass());
+        int al = getArrayLength(obj, offset);
+        return abo + scale * al;
     }
 }
