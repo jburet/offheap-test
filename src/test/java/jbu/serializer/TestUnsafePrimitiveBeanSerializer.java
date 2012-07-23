@@ -118,20 +118,65 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_array_primitive_bean() {
+    public void test_ser_deser_simple_array_int_primitive_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
-        long addr = a.alloc(16);
+        long addr = a.alloc(64);
         // Serialize
         Allocator.StoreContext sc = a.getStoreContext(addr);
-        ArrayPrimitive c = new ArrayPrimitive(new int[]{1, 2, 3, 4, 5, 6, 7});
+        ArrayIntPrimitive c = new ArrayIntPrimitive(new int[]{2, 2, 2, 2, 2, 2});
         pbs.serialize(c, sc);
 
         // Deser
         Allocator.LoadContext lc = a.getLoadContext(addr);
-        ArrayPrimitive res = new ArrayPrimitive(new int[]{0, 0, 0, 0, 0, 0, 0});
+        ArrayIntPrimitive res = new ArrayIntPrimitive(new int[]{0, 0, 0, 0, 0, 0});
         pbs.deserialize(res, lc);
         for(int i : res.a){
+            System.out.println(i);
+        }
+        // estimated size
+        int serSize = pbs.estimateSize(c);
+    }
+
+    @Test
+    public void test_ser_deser_simple_array_boolean_primitive_bean() {
+        Allocator a = new Allocator(1 * 1024 * 1024);
+        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        long addr = a.alloc(64);
+        // Serialize
+        Allocator.StoreContext sc = a.getStoreContext(addr);
+        ArrayBooleanPrimitive c = new ArrayBooleanPrimitive(new boolean[]{true, true, true, true, true});
+        pbs.serialize(c, sc);
+
+        // Deser
+        Allocator.LoadContext lc = a.getLoadContext(addr);
+        ArrayBooleanPrimitive res = new ArrayBooleanPrimitive(new boolean[]{false});
+        pbs.deserialize(res, lc);
+        for(boolean i : res.a){
+            System.out.println(i);
+        }
+        // estimated size
+        int serSize = pbs.estimateSize(c);
+    }
+
+
+    @Test
+    public void test_ser_deser_simple_array_long_primitive_bean() {
+        Allocator a = new Allocator(1 * 1024 * 1024);
+        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        long addr = a.alloc(64);
+        // Serialize
+        Allocator.StoreContext sc = a.getStoreContext(addr);
+        ArrayLongPrimitive c = new ArrayLongPrimitive(new long[]{1,2,5,10,20});
+        UnsafeReflection.debugArray(c.a);
+        pbs.serialize(c, sc);
+
+        // Deser
+        Allocator.LoadContext lc = a.getLoadContext(addr);
+        ArrayLongPrimitive res = new ArrayLongPrimitive(new long[]{});
+        UnsafeReflection.debugArray(res.a);
+        pbs.deserialize(res, lc);
+        for(long i : res.a){
             System.out.println(i);
         }
         // estimated size

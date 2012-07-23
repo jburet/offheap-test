@@ -83,16 +83,27 @@ public class UnsafeReflection {
         return offset;
     }
 
+    public static void debugArray(Object array) {
+        System.out.println("Offset : " + arrayBaseOffset(array));
+        System.out.println("b0 : " + unsafe.getInt(array, 0l));
+        System.out.println("b4 : " + unsafe.getInt(array, 1l));
+        System.out.println("b8 : " + unsafe.getInt(array, 2l));
+        System.out.println("b12 : " + unsafe.getInt(array, 3l));
+        System.out.println("b16 : " + unsafe.getInt(array, 4l));
+        System.out.println("b20 : " + unsafe.getInt(array, 5l));
+        System.out.println("b24 : " + unsafe.getInt(array, 6l));
+    }
 
-    public static int getArrayLength(Object obj, long offset) {
+
+    public static int getArrayLength(Object array) {
         // FIXME work only in array with dim = 1
         // FIXME JVM and JVM version dependent code... find best solution
-        // 3 case
+        // (at least) 3 case
         // 32 bits : size 8 - 12
         // 64 bits : size 16 - 20 + padding
         // 64 bits w pc : size 12 - 16
-        Object array = unsafe.getObject(obj, offset);
-        int abo = unsafe.arrayBaseOffset(array.getClass());
+        // tested with recent 1.6 64bit with -d32.. abo = 16 but sometime cannot read (or write) length (0...)
+        int abo = arrayBaseOffset(array);
         long lengthOff = 0;
         if (abo == 12) {
             lengthOff = 8;
@@ -104,12 +115,14 @@ public class UnsafeReflection {
         return unsafe.getInt(array, lengthOff);
     }
 
+    public static int arrayBaseOffset(Object array) {
+        return unsafe.arrayBaseOffset(array.getClass());
+    }
 
-    public static int getArraySizeInMem(Object obj, long offset) {
-        Object array = unsafe.getObject(obj, offset);
-        int abo = unsafe.arrayBaseOffset(array.getClass());
+
+    public static int getArraySizeContentInMem(Object array) {
         int scale = unsafe.arrayIndexScale(array.getClass());
-        int al = getArrayLength(obj, offset);
-        return abo + scale * al;
+        int al = getArrayLength(array);
+        return scale * al;
     }
 }

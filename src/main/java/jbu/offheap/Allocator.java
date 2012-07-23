@@ -357,6 +357,7 @@ public class Allocator implements AllocatorMBean {
         }
 
         // FIXME NOT USE IT .... NYI (Not yet implemented)
+        // Can be used for array...
         public void loadSomething2(Object object, long offset, int byteRemaining) {
             do {
                 int byteToCopy = (byteRemaining > remaining) ? remaining : byteRemaining;

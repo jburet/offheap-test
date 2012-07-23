@@ -1,8 +1,8 @@
 package jbu.serializer;
 
-public class ArrayPrimitive {
+public class ArrayIntPrimitive {
 
-    public ArrayPrimitive(int[] a) {
+    public ArrayIntPrimitive(int[] a) {
         this.a = a;
     }
 

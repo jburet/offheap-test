@@ -31,9 +31,10 @@ public class TestUnsafeReflection {
 
     @Test
     public void test_array_size_in_mem() throws NoSuchFieldException {
-        Field f = A.class.getDeclaredField("ar2");
+        Field f = A.class.getDeclaredField("ar");
         A a = new A();
-        System.out.println(UnsafeReflection.getArraySizeInMem(a,UnsafeReflection.getOffset(f)));
+        Object array = UnsafeReflection.getObject(f, a);
+        System.out.println(UnsafeReflection.getArraySizeContentInMem(array));
     }
 
 }
@@ -41,6 +42,6 @@ public class TestUnsafeReflection {
 class A {
     private int a = 42;
     private String b = "42";
-    private int[] ar = new int[]{1, 2};
+    private long[] ar = new long[]{1, 2, 5, 10, 20};
     private int[][] ar2 = new int[][]{{1,1},{1,1},{1,1}};
 }
