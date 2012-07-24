@@ -19,4 +19,31 @@ public class SomeDouble {
                 ", b2=" + b2 +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SomeDouble that = (SomeDouble) o;
+
+        if (Double.compare(that.b1, b1) != 0) return false;
+        if (Double.compare(that.b2, b2) != 0) return false;
+        if (Double.compare(that.b3, b3) != 0) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        temp = b1 != +0.0d ? Double.doubleToLongBits(b1) : 0L;
+        result = (int) (temp ^ (temp >>> 32));
+        temp = b3 != +0.0d ? Double.doubleToLongBits(b3) : 0L;
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = b2 != +0.0d ? Double.doubleToLongBits(b2) : 0L;
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
 }

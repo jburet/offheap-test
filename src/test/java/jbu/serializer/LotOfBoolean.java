@@ -19,4 +19,26 @@ public class LotOfBoolean {
                 ", b2=" + b2 +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LotOfBoolean that = (LotOfBoolean) o;
+
+        if (b1 != that.b1) return false;
+        if (b2 != that.b2) return false;
+        if (b3 != that.b3) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (b1 ? 1 : 0);
+        result = 31 * result + (b3 ? 1 : 0);
+        result = 31 * result + (b2 ? 1 : 0);
+        return result;
+    }
 }

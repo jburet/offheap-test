@@ -37,4 +37,38 @@ public class LotOfInt {
                 ", i=" + i +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LotOfInt lotOfInt = (LotOfInt) o;
+
+        if (a != lotOfInt.a) return false;
+        if (b != lotOfInt.b) return false;
+        if (c != lotOfInt.c) return false;
+        if (d != lotOfInt.d) return false;
+        if (e != lotOfInt.e) return false;
+        if (f != lotOfInt.f) return false;
+        if (g != lotOfInt.g) return false;
+        if (h != lotOfInt.h) return false;
+        if (i != lotOfInt.i) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = a;
+        result = 31 * result + b;
+        result = 31 * result + c;
+        result = 31 * result + d;
+        result = 31 * result + e;
+        result = 31 * result + f;
+        result = 31 * result + g;
+        result = 31 * result + h;
+        result = 31 * result + i;
+        return result;
+    }
 }

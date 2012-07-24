@@ -38,15 +38,12 @@ public class UnsafePrimitiveBeanSerializer {
         for (int i = 0; i < cd.nbFields; i++) {
             if (cd.types[i].isArray) {
                 Object array = unsafe.getObject(obj, cd.offsets[i]);
-                UnsafeReflection.debugArray(array);
                 int arrayContentLength = UnsafeReflection.getArraySizeContentInMem(array);
                 int arrayLength = UnsafeReflection.getArrayLength(array);
                 int arrayBaseOffset = UnsafeReflection.arrayBaseOffset(array);
                 // Store only length on 4 Bytes on after content length
                 sc.storeInt(arrayLength);
-                // FIXME In 64bits with oops compression need to add 4 bytes of padding
-                // FIXME In 64bits without oops compression need 8 bytes..
-                sc.storeSomething(obj, cd.offsets[i] + arrayBaseOffset+4, arrayContentLength);
+                sc.storeSomething(array, arrayBaseOffset, arrayContentLength);
             } else {
                 sc.storeSomething(obj, cd.offsets[i], cd.types[i].getLength());
             }
@@ -75,8 +72,6 @@ public class UnsafePrimitiveBeanSerializer {
                     e.printStackTrace();
                 }
                 lc.loadSomething2(UnsafeReflection.getObject(cd.fields[i], obj), UnsafeReflection.arrayBaseOffset(heapArray), UnsafeReflection.getArraySizeContentInMem(newArray));
-                // put array in object field
-
             } else {
                 lc.loadSomething(obj, cd.offsets[i], cd.types[i], cd.types[i].getLength());
             }

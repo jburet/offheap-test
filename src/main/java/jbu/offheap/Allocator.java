@@ -267,7 +267,6 @@ public class Allocator implements AllocatorMBean {
     public class StoreContext {
 
         private long firstChunkAdr;
-        private long currentChunkAdr;
         private long currentBaseAdr;
         private int currentOffset;
         private int remaining;
@@ -289,10 +288,12 @@ public class Allocator implements AllocatorMBean {
         }
 
         public void storeSomething(Object object, long offset, int byteRemaining) {
+            int copiedBytes = 0;
             do {
                 int byteToCopy = (remaining > byteRemaining) ? byteRemaining : remaining;
                 byteRemaining -= byteToCopy;
-                unsafe.copyMemory(object, offset, null, this.currentBaseAdr + this.currentOffset, byteToCopy);
+                unsafe.copyMemory(object, offset + copiedBytes, null, this.currentBaseAdr + this.currentOffset, byteToCopy);
+                copiedBytes += byteToCopy;
                 this.currentOffset += byteToCopy;
                 this.remaining -= byteToCopy;
                 // If remaining in currentChunk == 0 load next chunk
@@ -304,7 +305,6 @@ public class Allocator implements AllocatorMBean {
         }
 
         private void beginNewChunk(long chunkAdr) {
-            this.currentChunkAdr = chunkAdr;
             // get bins
             // FIXME Suport only unsafebin
             // Get baseAdr of allocated memory
@@ -358,14 +358,16 @@ public class Allocator implements AllocatorMBean {
 
         // FIXME NOT USE IT .... NYI (Not yet implemented)
         // Can be used for array...
-        public void loadSomething2(Object object, long offset, int byteRemaining) {
+        public void loadSomething2(Object dest, long offset, int byteRemaining) {
+            int copiedBytes = 0;
             do {
                 int byteToCopy = (byteRemaining > remaining) ? remaining : byteRemaining;
                 //int d = unsafe.getInt(this.currentBaseAdr + this.currentOffset);
                 // FIXME WHY DIRECT MEMORY DON'T WORK !!!!!!!!!! (throw illegalArgument)
                 // FIXME Marked as NotYetImplemented in code work only if destination are primitive array
                 // See http://mail.openjdk.java.net/pipermail/hotspot-runtime-dev/2012-March/003322.html
-                unsafe.copyMemory(null, this.currentBaseAdr + this.currentOffset, object, offset, byteToCopy);
+                unsafe.copyMemory(null, this.currentBaseAdr + this.currentOffset, dest, offset+copiedBytes, byteToCopy);
+                copiedBytes += byteToCopy;
                 //unsafe.putInt(object, offset, d);
                 byteRemaining -= byteToCopy;
                 this.currentOffset += byteToCopy;

@@ -160,4 +160,158 @@ public class LotOfPrimitive {
                 ", d8=" + d8 +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LotOfPrimitive that = (LotOfPrimitive) o;
+
+        if (b1 != that.b1) return false;
+        if (b2 != that.b2) return false;
+        if (b3 != that.b3) return false;
+        if (b4 != that.b4) return false;
+        if (b5 != that.b5) return false;
+        if (b6 != that.b6) return false;
+        if (b7 != that.b7) return false;
+        if (b8 != that.b8) return false;
+        if (by1 != that.by1) return false;
+        if (by2 != that.by2) return false;
+        if (by3 != that.by3) return false;
+        if (by4 != that.by4) return false;
+        if (by5 != that.by5) return false;
+        if (by6 != that.by6) return false;
+        if (by7 != that.by7) return false;
+        if (by8 != that.by8) return false;
+        if (c1 != that.c1) return false;
+        if (c2 != that.c2) return false;
+        if (c3 != that.c3) return false;
+        if (c4 != that.c4) return false;
+        if (c5 != that.c5) return false;
+        if (c6 != that.c6) return false;
+        if (c7 != that.c7) return false;
+        if (c8 != that.c8) return false;
+        if (Double.compare(that.d1, d1) != 0) return false;
+        if (Double.compare(that.d2, d2) != 0) return false;
+        if (Double.compare(that.d3, d3) != 0) return false;
+        if (Double.compare(that.d4, d4) != 0) return false;
+        if (Double.compare(that.d5, d5) != 0) return false;
+        if (Double.compare(that.d6, d6) != 0) return false;
+        if (Double.compare(that.d7, d7) != 0) return false;
+        if (Double.compare(that.d8, d8) != 0) return false;
+        if (Float.compare(that.f1, f1) != 0) return false;
+        if (Float.compare(that.f2, f2) != 0) return false;
+        if (Float.compare(that.f3, f3) != 0) return false;
+        if (Float.compare(that.f4, f4) != 0) return false;
+        if (Float.compare(that.f5, f5) != 0) return false;
+        if (Float.compare(that.f6, f6) != 0) return false;
+        if (Float.compare(that.f7, f7) != 0) return false;
+        if (Float.compare(that.f8, f8) != 0) return false;
+        if (i1 != that.i1) return false;
+        if (i2 != that.i2) return false;
+        if (i3 != that.i3) return false;
+        if (i4 != that.i4) return false;
+        if (i5 != that.i5) return false;
+        if (i6 != that.i6) return false;
+        if (i7 != that.i7) return false;
+        if (i8 != that.i8) return false;
+        if (l1 != that.l1) return false;
+        if (l2 != that.l2) return false;
+        if (l3 != that.l3) return false;
+        if (l4 != that.l4) return false;
+        if (l5 != that.l5) return false;
+        if (l6 != that.l6) return false;
+        if (l7 != that.l7) return false;
+        if (l8 != that.l8) return false;
+        if (s1 != that.s1) return false;
+        if (s2 != that.s2) return false;
+        if (s3 != that.s3) return false;
+        if (s4 != that.s4) return false;
+        if (s5 != that.s5) return false;
+        if (s6 != that.s6) return false;
+        if (s7 != that.s7) return false;
+        if (s8 != that.s8) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = (b1 ? 1 : 0);
+        result = 31 * result + (b2 ? 1 : 0);
+        result = 31 * result + (b3 ? 1 : 0);
+        result = 31 * result + (b4 ? 1 : 0);
+        result = 31 * result + (b5 ? 1 : 0);
+        result = 31 * result + (b6 ? 1 : 0);
+        result = 31 * result + (b7 ? 1 : 0);
+        result = 31 * result + (b8 ? 1 : 0);
+        result = 31 * result + (int) c1;
+        result = 31 * result + (int) c2;
+        result = 31 * result + (int) c3;
+        result = 31 * result + (int) c4;
+        result = 31 * result + (int) c5;
+        result = 31 * result + (int) c6;
+        result = 31 * result + (int) c7;
+        result = 31 * result + (int) c8;
+        result = 31 * result + (int) by1;
+        result = 31 * result + (int) by2;
+        result = 31 * result + (int) by3;
+        result = 31 * result + (int) by4;
+        result = 31 * result + (int) by5;
+        result = 31 * result + (int) by6;
+        result = 31 * result + (int) by7;
+        result = 31 * result + (int) by8;
+        result = 31 * result + (int) s1;
+        result = 31 * result + (int) s2;
+        result = 31 * result + (int) s3;
+        result = 31 * result + (int) s4;
+        result = 31 * result + (int) s5;
+        result = 31 * result + (int) s6;
+        result = 31 * result + (int) s7;
+        result = 31 * result + (int) s8;
+        result = 31 * result + i1;
+        result = 31 * result + i2;
+        result = 31 * result + i3;
+        result = 31 * result + i4;
+        result = 31 * result + i5;
+        result = 31 * result + i6;
+        result = 31 * result + i7;
+        result = 31 * result + i8;
+        result = 31 * result + (int) (l1 ^ (l1 >>> 32));
+        result = 31 * result + (int) (l2 ^ (l2 >>> 32));
+        result = 31 * result + (int) (l3 ^ (l3 >>> 32));
+        result = 31 * result + (int) (l4 ^ (l4 >>> 32));
+        result = 31 * result + (int) (l5 ^ (l5 >>> 32));
+        result = 31 * result + (int) (l6 ^ (l6 >>> 32));
+        result = 31 * result + (int) (l7 ^ (l7 >>> 32));
+        result = 31 * result + (int) (l8 ^ (l8 >>> 32));
+        result = 31 * result + (f1 != +0.0f ? Float.floatToIntBits(f1) : 0);
+        result = 31 * result + (f2 != +0.0f ? Float.floatToIntBits(f2) : 0);
+        result = 31 * result + (f3 != +0.0f ? Float.floatToIntBits(f3) : 0);
+        result = 31 * result + (f4 != +0.0f ? Float.floatToIntBits(f4) : 0);
+        result = 31 * result + (f5 != +0.0f ? Float.floatToIntBits(f5) : 0);
+        result = 31 * result + (f6 != +0.0f ? Float.floatToIntBits(f6) : 0);
+        result = 31 * result + (f7 != +0.0f ? Float.floatToIntBits(f7) : 0);
+        result = 31 * result + (f8 != +0.0f ? Float.floatToIntBits(f8) : 0);
+        temp = d1 != +0.0d ? Double.doubleToLongBits(d1) : 0L;
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = d2 != +0.0d ? Double.doubleToLongBits(d2) : 0L;
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = d3 != +0.0d ? Double.doubleToLongBits(d3) : 0L;
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = d4 != +0.0d ? Double.doubleToLongBits(d4) : 0L;
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = d5 != +0.0d ? Double.doubleToLongBits(d5) : 0L;
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = d6 != +0.0d ? Double.doubleToLongBits(d6) : 0L;
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = d7 != +0.0d ? Double.doubleToLongBits(d7) : 0L;
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = d8 != +0.0d ? Double.doubleToLongBits(d8) : 0L;
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
 }

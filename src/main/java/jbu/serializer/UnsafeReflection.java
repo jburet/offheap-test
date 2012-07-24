@@ -84,14 +84,23 @@ public class UnsafeReflection {
     }
 
     public static void debugArray(Object array) {
+        int scale = unsafe.arrayIndexScale(array.getClass());
         System.out.println("Offset : " + arrayBaseOffset(array));
+        System.out.println("scale : " + unsafe.arrayIndexScale(array.getClass()));
         System.out.println("b0 : " + unsafe.getInt(array, 0l));
-        System.out.println("b4 : " + unsafe.getInt(array, 1l));
-        System.out.println("b8 : " + unsafe.getInt(array, 2l));
-        System.out.println("b12 : " + unsafe.getInt(array, 3l));
-        System.out.println("b16 : " + unsafe.getInt(array, 4l));
-        System.out.println("b20 : " + unsafe.getInt(array, 5l));
-        System.out.println("b24 : " + unsafe.getInt(array, 6l));
+        System.out.println("b4 : " + unsafe.getInt(array, 4l));
+        System.out.println("b8 : " + unsafe.getInt(array, 8l));
+        int length = unsafe.getInt(array, 12l);
+        System.out.println("length : " + length);
+        for (int i = 0; i < length; i++) {
+            if (scale == 4) {
+                System.out.println("i : " + unsafe.getInt(array, i * 4 + 16l));
+            }
+            if (scale == 8) {
+                System.out.println(i + ": " + unsafe.getLong(array, i * 8 + 16l));
+            }
+        }
+
     }
 
 
