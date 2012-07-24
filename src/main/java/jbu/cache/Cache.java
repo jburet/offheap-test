@@ -1,11 +1,15 @@
 package jbu.cache;
 
+import jbu.offheap.Allocator;
+
 public class Cache<K> {
 
-    private String name;
+    private final String name;
+    private final Allocator allocator;
 
-    public Cache(String name) {
+    public Cache(String name, int approxSize) {
         this.name = name;
+        this.allocator = new Allocator(approxSize);
     }
 
     /**
