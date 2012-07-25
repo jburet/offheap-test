@@ -5,6 +5,11 @@ public class LotOfBoolean {
     private boolean b3;
     private boolean b2;
 
+
+    public LotOfBoolean() {
+        this(true);
+    }
+
     public LotOfBoolean(boolean b) {
         this.b1 = b;
         this.b2 = b;

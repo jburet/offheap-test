@@ -26,6 +26,10 @@ public class LotOfDouble {
         this.b3 = b;
     }
 
+    public LotOfDouble() {
+        this(23);
+    }
+
     @Override
     public String toString() {
         return "LotOfDouble{" +

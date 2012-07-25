@@ -11,6 +11,10 @@ public class SomeDouble {
         this.b3 = b;
     }
 
+    public SomeDouble() {
+        this(1);
+    }
+
     @Override
     public String toString() {
         return "SomeDouble{" +

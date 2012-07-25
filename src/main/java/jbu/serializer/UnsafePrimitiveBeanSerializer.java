@@ -6,35 +6,17 @@ import jbu.offheap.UnsafeUtil;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.util.*;
 
 public class UnsafePrimitiveBeanSerializer {
 
-    private static final Map<Class, ClassDesc> registeredClassOffset = new HashMap<Class, ClassDesc>();
-
     private static final Unsafe unsafe = UnsafeUtil.unsafe;
-
-    public static ClassDesc registerClass(Class c) {
-        Field[] fields = c.getDeclaredFields();
-        long[] offsets = new long[fields.length];
-        Type[] types = new Type[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            Field f = fields[i];
-            f.setAccessible(true);
-            offsets[i] = unsafe.objectFieldOffset(f);
-            types[i] = Type.resolveType(f);
-        }
-        registeredClassOffset.put(c, new ClassDesc(types, offsets, fields));
-        return registeredClassOffset.get(c);
-    }
 
     public void serialize(Object obj, Allocator.StoreContext sc) {
         Class clazz = obj.getClass();
-        ClassDesc cd = null;
-        if ((cd = registeredClassOffset.get(clazz)) == null) {
-            cd = registerClass(clazz);
-        }
+        ClassDesc cd = ClassDesc.resolveByClass(clazz);
+
+        // Serialize class reference
+        sc.storeInt(cd.classReference);
         for (int i = 0; i < cd.nbFields; i++) {
             if (cd.types[i].isArray) {
                 Object array = unsafe.getObject(obj, cd.offsets[i]);
@@ -50,11 +32,22 @@ public class UnsafePrimitiveBeanSerializer {
         }
     }
 
-    public void deserialize(Object obj, Allocator.LoadContext lc) {
-        Class clazz = obj.getClass();
-        ClassDesc cd = null;
-        if ((cd = registeredClassOffset.get(clazz)) == null) {
-            cd = registerClass(clazz);
+    /**
+     * Deserialize inside obj. Offset of loadcontext must be placed at the beginning of serialized object
+     *
+     * @param lc
+     */
+    public Object deserialize(Allocator.LoadContext lc) {
+        ClassDesc cd = ClassDesc.resolveByRef(lc.loadInt());
+        Object res = null;
+        // constructor without arg must exist...
+        try {
+            res = cd.clazz.newInstance();
+            // FIXME How manage this exception ?
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
         for (int i = 0; i < cd.nbFields; i++) {
             if (cd.types[i].isArray) {
@@ -64,27 +57,31 @@ public class UnsafePrimitiveBeanSerializer {
                 // FIXME Verify cd.field[i].getType is an array
                 Object newArray = Array.newInstance(cd.fields[i].getType().getComponentType(), arrayLength);
                 // Replace content in heap from content serialized in offheap
-                Object heapArray = UnsafeReflection.getObject(cd.fields[i], obj);
+                Object heapArray = UnsafeReflection.getObject(cd.fields[i], res);
                 try {
-                    cd.fields[i].set(obj, newArray);
+                    cd.fields[i].set(res, newArray);
                 } catch (IllegalAccessException e) {
                     // FIXME manage this exception
                     e.printStackTrace();
                 }
-                lc.loadSomething2(UnsafeReflection.getObject(cd.fields[i], obj), UnsafeReflection.arrayBaseOffset(heapArray), UnsafeReflection.getArraySizeContentInMem(newArray));
+                lc.loadSomething2(UnsafeReflection.getObject(cd.fields[i], res), UnsafeReflection.arrayBaseOffset(heapArray),
+                        UnsafeReflection.getArraySizeContentInMem(newArray));
             } else {
-                lc.loadSomething(obj, cd.offsets[i], cd.types[i], cd.types[i].getLength());
+                lc.loadSomething(res, cd.offsets[i], cd.types[i], cd.types[i].getLength());
             }
         }
+        return res;
     }
 
-    public int estimateSize(Object obj) {
+    public int estimateSerializedSize(Object obj) {
         Class clazz = obj.getClass();
-        ClassDesc cd = null;
-        if ((cd = registeredClassOffset.get(clazz)) == null) {
-            cd = registerClass(clazz);
-        }
+        ClassDesc cd = ClassDesc.resolveByClass(clazz);
         int size = 0;
+
+        // Add class reference
+        size += 8;
+
+        // Add size for each field
         for (int i = 0; i < cd.nbFields; i++) {
             // FIXME support only primitive and array
             if (cd.types[i].isArray) {
@@ -97,5 +94,4 @@ public class UnsafePrimitiveBeanSerializer {
         }
         return size;
     }
-
 }

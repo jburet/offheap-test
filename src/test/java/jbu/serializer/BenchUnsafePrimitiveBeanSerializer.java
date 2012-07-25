@@ -3,8 +3,6 @@ package jbu.serializer;
 import jbu.offheap.Allocator;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
-
 public class BenchUnsafePrimitiveBeanSerializer {
 
     @Test
@@ -46,7 +44,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         long start = System.nanoTime();
         int NB_MSG_READ = 10000000;
         for (int i = 0; i < NB_MSG_READ; i++) {
-            pbs.deserialize(res, lc);
+            pbs.deserialize( lc);
             // Free load context
             lc.reset();
         }
@@ -65,7 +63,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         int NB_MSG_WRITE = 1000000;
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
-        int serSize = pbs.estimateSize(c);
+        int serSize = pbs.estimateSerializedSize(c);
         System.out.println("Serialized size: " + serSize);
         Allocator.StoreContext sc = a.getStoreContext(a.alloc(serSize));
 
@@ -88,7 +86,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(1 * 1024 * 1024);
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
-        int serSize = pbs.estimateSize(c);
+        int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
         Allocator.StoreContext sc = a.getStoreContext(addr);
@@ -102,7 +100,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         long start = System.nanoTime();
         int NB_MSG_READ = 1000000;
         for (int i = 0; i < NB_MSG_READ; i++) {
-            pbs.deserialize(res, lc);
+            pbs.deserialize( lc);
             // Free load context
             lc.reset();
         }
@@ -120,16 +118,16 @@ public class BenchUnsafePrimitiveBeanSerializer {
         int NB_MSG_WRITE = 1000000;
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
-        int serSize = pbs.estimateSize(c);
+        int serSize = pbs.estimateSerializedSize(c);
         long start = System.nanoTime();
         for (int i = 0; i < NB_MSG_WRITE; i++) {
-            int intSerSize = pbs.estimateSize(c);
+            int intSerSize = pbs.estimateSerializedSize(c);
             long addr = a.alloc(intSerSize);
             Allocator.StoreContext sc = a.getStoreContext(addr);
             pbs.serialize(c, sc);
             LotOfPrimitive res = new LotOfPrimitive();
             Allocator.LoadContext lc = a.getLoadContext(addr);
-            pbs.deserialize(res, lc);
+            pbs.deserialize( lc);
         }
         long time = System.nanoTime() - start;
         System.out.println("Write End in " + time / 1000 / 1000 + " ms");
@@ -146,14 +144,14 @@ public class BenchUnsafePrimitiveBeanSerializer {
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
         LotOfPrimitive res = new LotOfPrimitive();
-        int serSize = pbs.estimateSize(c);
-        int intSerSize = pbs.estimateSize(c);
+        int serSize = pbs.estimateSerializedSize(c);
+        int intSerSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(intSerSize);
         Allocator.StoreContext sc = a.getStoreContext(addr);
         Allocator.LoadContext lc = a.getLoadContext(addr);
         while (true) {
             pbs.serialize(c, sc);
-            pbs.deserialize(res, lc);
+            pbs.deserialize( lc);
             sc.reuse();
             lc.reset();
         }
@@ -167,14 +165,14 @@ public class BenchUnsafePrimitiveBeanSerializer {
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitiveAndArray c = new LotOfPrimitiveAndArray();
         LotOfPrimitiveAndArray res = new LotOfPrimitiveAndArray();
-        int serSize = pbs.estimateSize(c);
+        int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(1024);
         Allocator.StoreContext sc = a.getStoreContext(addr);
         Allocator.LoadContext lc = a.getLoadContext(addr);
         long start = System.nanoTime();
         for (int i = 0; i < NB_MSG_WRITE; i++) {
             pbs.serialize(c, sc);
-            pbs.deserialize(res, lc);
+            pbs.deserialize( lc);
             sc.reuse();
             lc.reset();
         }

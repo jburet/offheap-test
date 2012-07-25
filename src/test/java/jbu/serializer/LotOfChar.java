@@ -11,6 +11,10 @@ public class LotOfChar {
         this.b3 = b;
     }
 
+    public LotOfChar() {
+        this('a');
+    }
+
     @Override
     public String toString() {
         return "LotOfChar{" +

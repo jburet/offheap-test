@@ -11,6 +11,10 @@ public class LotOfInt {
     private int h = 42;
     private int i = 42;
 
+    public LotOfInt() {
+        this(1);
+    }
+
     public LotOfInt(int i) {
         this.a = i;
         this.b = i;

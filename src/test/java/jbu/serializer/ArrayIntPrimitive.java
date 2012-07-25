@@ -6,5 +6,9 @@ public class ArrayIntPrimitive {
         this.a = a;
     }
 
+    public ArrayIntPrimitive() {
+        this(new int[]{});
+    }
+
     int[] a = new int[]{2, 4};
 }

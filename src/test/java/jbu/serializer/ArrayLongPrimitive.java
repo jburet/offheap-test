@@ -6,5 +6,9 @@ public class ArrayLongPrimitive {
         this.a = a;
     }
 
+    public ArrayLongPrimitive() {
+        this(new long[]{});
+    }
+
     long[] a = new long[]{9, 9};
 }
