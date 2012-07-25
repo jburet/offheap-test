@@ -2,6 +2,7 @@ package jbu.serializer;
 
 import jbu.offheap.Allocator;
 import jbu.offheap.LoadContext;
+import jbu.offheap.StoreContext;
 import jbu.testobject.*;
 import org.junit.Test;
 
@@ -18,7 +19,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(9 * 4);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
         LotOfInt c = new LotOfInt(10);
         pbs.serialize(c, sc);
 
@@ -36,7 +37,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
 
         pbs.serialize(c, sc);
 
@@ -54,7 +55,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
 
         pbs.serialize(c, sc);
 
@@ -72,7 +73,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
 
         pbs.serialize(c, sc);
 
@@ -90,7 +91,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
 
         pbs.serialize(c, sc);
 
@@ -108,7 +109,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
 
         pbs.serialize(c, sc);
 
@@ -124,7 +125,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(64);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
         ArrayIntPrimitive c = new ArrayIntPrimitive(new int[]{2, 2, 2, 2, 2, 2});
         pbs.serialize(c, sc);
 
@@ -146,7 +147,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(64);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
         ArrayBooleanPrimitive c = new ArrayBooleanPrimitive(new boolean[]{true, true, true, true, true});
         pbs.serialize(c, sc);
 
@@ -170,7 +171,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         System.out.println(pbs.estimateSerializedSize(c));
         long addr = a.alloc(2048);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
 
         //UnsafeReflection.debugArray(c.a);
         pbs.serialize(c, sc);
@@ -193,9 +194,9 @@ public class TestUnsafePrimitiveBeanSerializer {
         UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitiveAndArray c = new LotOfPrimitiveAndArray();
         System.out.println(pbs.estimateSerializedSize(c));
-        long addr = a.alloc(1024);
+        long addr = a.alloc(2048);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
 
         //UnsafeReflection.debugArray(c.a);
         pbs.serialize(c, sc);
@@ -220,7 +221,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         System.out.println(pbs.estimateSerializedSize(c));
         long addr = a.alloc(1024);
         // Serialize
-        Allocator.StoreContext sc = a.getStoreContext(addr);
+        StoreContext sc = a.getStoreContext(addr);
 
         //UnsafeReflection.debugArray(c.a);
         pbs.serialize(c, sc);

@@ -70,7 +70,7 @@ public class TestAllocator {
         int a = 42;
         Allocator allocator = new Allocator(1 * 1024);
         long firstChunk = allocator.alloc(4);
-        Allocator.StoreContext sc = allocator.getStoreContext(firstChunk);
+        StoreContext sc = allocator.getStoreContext(firstChunk);
         sc.storeInt(a);
         LoadContext lc = allocator.getLoadContext(firstChunk);
         int b = lc.loadInt();
@@ -82,11 +82,11 @@ public class TestAllocator {
         OneInt oi = new OneInt(42);
         Allocator allocator = new Allocator(1 * 1024);
         long firstChunk = allocator.alloc(4);
-        Allocator.StoreContext sc = allocator.getStoreContext(firstChunk);
+        StoreContext sc = allocator.getStoreContext(firstChunk);
         sc.storeSomething(oi, UnsafeUtil.unsafe.objectFieldOffset(OneInt.class.getDeclaredField("a")), 4);
         LoadContext lc = allocator.getLoadContext(firstChunk);
         OneInt oi2 = new OneInt(0);
-        lc.loadSomething(oi2, UnsafeUtil.unsafe.objectFieldOffset(OneInt.class.getDeclaredField("a")), Type.INT, 4);
+        lc.loadPrimitive(oi2, UnsafeUtil.unsafe.objectFieldOffset(OneInt.class.getDeclaredField("a")), 4);
         System.out.println(oi2.a);
     }
 

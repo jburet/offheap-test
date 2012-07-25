@@ -9,11 +9,6 @@ public class LoadContext {
 
     private static final Unsafe unsafe = UnsafeUtil.unsafe;
 
-    // Allocate buffer for each load is very expensive... Allocate only one and reuse
-    // Allocate a new buffer for each LoadContext allocation is also too expensive (limit to 250000 load/s)
-    // Pooling allocated memory is not a good idea... limit(150000 load/s)
-    private long tmpAddr = unsafe.allocateMemory(8);
-
     private long currentChunkAdr;
     private long firstChunkAdr;
     private long currentBaseAdr;
@@ -32,12 +27,6 @@ public class LoadContext {
         beginNewChunk(this.firstChunkAdr);
     }
 
-    // Release allocated offheap memory during GC
-    @Override
-    protected void finalize() throws Throwable {
-        unsafe.freeMemory(tmpAddr);
-    }
-
     public int loadInt() {
         int res = unsafe.getInt(this.currentBaseAdr + this.currentOffset);
         // FIXME 4 (int length) must be constant
@@ -48,7 +37,7 @@ public class LoadContext {
 
     // NOT USE IT for another thing than array .... NYI (Not yet implemented)
     // Can be used for array...
-    public void loadSomething2(Object dest, long offset, int byteRemaining) {
+    public void loadArray(Object dest, long offset, int byteRemaining) {
         int copiedBytes = 0;
         do {
             int byteToCopy = (byteRemaining > remaining) ? remaining : byteRemaining;
@@ -69,68 +58,51 @@ public class LoadContext {
         } while (byteRemaining > 0);
     }
 
-    // loadSomething2 has a better impl, but working only when jdk7 are really fully implemented...
+    // loadArray has a better impl, but working only when jdk7 are really fully implemented...
     // Workaround for copy memory
     // Allocate tmpbuffer in offheap .. and read with typed method of unsafe
-    public void loadSomething(Object dest, long destOffset, Type type, int byteRemaining) {
+    public void loadPrimitive(Object dest, long destOffset, int totalByteRemaining) {
 
-        int offset = 0;
-        long byteToCopyAddr = this.tmpAddr;
         // Use tmp memory only if really needed
-        if (byteRemaining > remaining) {
-            do {
-                int byteToCopy = (byteRemaining > remaining) ? remaining : byteRemaining;
-                unsafe.copyMemory(this.currentBaseAdr + this.currentOffset, byteToCopyAddr + offset, byteToCopy);
-                byteRemaining -= byteToCopy;
+        do {
+            int byteToCopy = (totalByteRemaining > remaining) ? remaining : totalByteRemaining;
+            int byteRemaining = byteToCopy;
 
-                if (this.remaining == 0) {
-                    // Get next chunk address in last 4 byte
-                    beginNewChunk(unsafe.getLong(this.currentBaseAdr + this.currentOffset));
-                }
-                offset += byteToCopy;
-            } while (byteRemaining > 0);
-
-        } else {
-            // Tmp addr not really needed
-            byteToCopyAddr = this.currentBaseAdr + this.currentOffset;
-            this.currentOffset += byteRemaining;
-            this.remaining -= byteRemaining;
-        }
-
-        if (!type.isArray) {
-            if (type.equals(Type.BOOLEAN)) {
-                boolean b = unsafe.getBoolean(null, byteToCopyAddr);
-                unsafe.putBoolean(dest, destOffset, b);
+            // primitive take 8,4,2 or 1 byte
+            // Take the greatest size under totalByteRemaining
+            if (byteRemaining / 8 == 1) {
+                // copy 8 byte
+                long b = unsafe.getLong(null, this.currentBaseAdr + this.currentOffset);
+                unsafe.putLong(dest, destOffset, b);
+                byteRemaining -= 8;
             }
-            if (type.equals(Type.CHAR)) {
-                char c = unsafe.getChar(byteToCopyAddr);
-                unsafe.putChar(dest, destOffset, c);
+            if (byteRemaining / 4 == 1) {
+                // copy 4 byte
+                int b = unsafe.getInt(null, this.currentBaseAdr + this.currentOffset);
+                unsafe.putInt(dest, destOffset, b);
+                byteRemaining -= 4;
             }
-            if (type.equals(Type.BYTE)) {
-                byte b = unsafe.getByte(byteToCopyAddr);
+            if (byteRemaining / 2 == 1) {
+                // copy 2 byte
+                short b = unsafe.getShort(null, this.currentBaseAdr + this.currentOffset);
+                unsafe.putShort(dest, destOffset, b);
+                byteRemaining -= 2;
+            }
+            if (byteRemaining / 1 == 1) {
+                // copy 1 byte
+                byte b = unsafe.getByte(null, this.currentBaseAdr + this.currentOffset);
                 unsafe.putByte(dest, destOffset, b);
+                byteRemaining -= 1;
             }
-            if (type.equals(Type.SHORT)) {
-                short s = unsafe.getShort(byteToCopyAddr);
-                unsafe.putShort(dest, destOffset, s);
+            totalByteRemaining -= byteToCopy;
+            this.remaining -= byteToCopy;
+            this.currentOffset += byteToCopy;
+            // If all chunk loaded take a new one
+            if (this.remaining == 0) {
+                // Get next chunk address in last 4 byte
+                beginNewChunk(unsafe.getLong(this.currentBaseAdr + this.currentOffset));
             }
-            if (type.equals(Type.INT)) {
-                int i = unsafe.getInt(byteToCopyAddr);
-                unsafe.putInt(dest, destOffset, i);
-            }
-            if (type.equals(Type.LONG)) {
-                long l = unsafe.getLong(byteToCopyAddr);
-                unsafe.putLong(dest, destOffset, l);
-            }
-            if (type.equals(Type.FLOAT)) {
-                float f = unsafe.getFloat(byteToCopyAddr);
-                unsafe.putFloat(dest, destOffset, f);
-            }
-            if (type.equals(Type.DOUBLE)) {
-                double d = unsafe.getDouble(byteToCopyAddr);
-                unsafe.putDouble(dest, destOffset, d);
-            }
-        }
+        } while (totalByteRemaining > 0);
     }
 
 

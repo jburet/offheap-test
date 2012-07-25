@@ -3,6 +3,7 @@ package jbu.serializer;
 
 import jbu.offheap.Allocator;
 import jbu.offheap.LoadContext;
+import jbu.offheap.StoreContext;
 import jbu.offheap.UnsafeUtil;
 import sun.misc.Unsafe;
 
@@ -12,7 +13,7 @@ public class UnsafePrimitiveBeanSerializer {
 
     private static final Unsafe unsafe = UnsafeUtil.unsafe;
 
-    public void serialize(Object obj, Allocator.StoreContext sc) {
+    public void serialize(Object obj, StoreContext sc) {
         Class clazz = obj.getClass();
         ClassDesc cd = ClassDesc.resolveByClass(clazz);
 
@@ -65,10 +66,10 @@ public class UnsafePrimitiveBeanSerializer {
                     // FIXME manage this exception
                     e.printStackTrace();
                 }
-                lc.loadSomething2(UnsafeReflection.getObject(cd.fields[i], res), UnsafeReflection.arrayBaseOffset(heapArray),
+                lc.loadArray(UnsafeReflection.getObject(cd.fields[i], res), UnsafeReflection.arrayBaseOffset(heapArray),
                         UnsafeReflection.getArraySizeContentInMem(newArray));
             } else {
-                lc.loadSomething(res, cd.offsets[i], cd.types[i], cd.types[i].getLength());
+                lc.loadPrimitive(res, cd.offsets[i], cd.types[i].getLength());
             }
         }
         return res;

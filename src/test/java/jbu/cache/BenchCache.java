@@ -15,7 +15,11 @@ public class BenchCache {
         // Get them all
         // Remove them
         // etc...
-
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         int NB_OBJ = 1000000;
 
         long putTime = 0;
