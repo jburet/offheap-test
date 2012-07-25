@@ -1,16 +1,20 @@
 package jbu.cache;
 
-import jbu.offheap.Allocator;
 import jbu.serializer.UnsafePrimitiveBeanSerializer;
 import jbu.testobject.LotOfPrimitiveAndArray;
+import org.apache.directmemory.DirectMemory;
+import org.apache.directmemory.cache.CacheService;
+import org.bigcache.BigCache;
+import org.bigcache.BigCacheManager;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
-public class BenchCache {
+public class BenchBigCache {
 
     @Test
-    public void bench_put_get() {
+    public void bench_put_get() throws FileNotFoundException {
         // Put n object in map
         // Get them all
         // Remove them
@@ -20,19 +24,21 @@ public class BenchCache {
         } catch (InterruptedException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        int NB_OBJ = 10000;
+        int NB_OBJ = 100000;
 
         long putTime = 0;
         long put = 0;
         long getTime = 0;
         long get = 0;
 
-        Allocator allocator = new Allocator(1024 * 1024 * 1024);
-        Cache<Integer, LotOfPrimitiveAndArray> cache = new Cache<Integer, LotOfPrimitiveAndArray>("testCache", allocator);
+        BigCacheManager bigCacheManager = BigCacheManager.configure(new FileInputStream("src/test/resources/bigcache-config.xml"));
+        BigCache cache = bigCacheManager.getCache("users");
+
         LotOfPrimitiveAndArray cachedObject = new LotOfPrimitiveAndArray();
         int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
-        for (int j = 0; j < 10000; j++) {
+
+        for (int j = 0; j < NB_OBJ; j++) {
             long start = System.nanoTime();
             for (int i = 0; i < NB_OBJ; i++) {
                 cache.put(i, cachedObject);
@@ -46,7 +52,7 @@ public class BenchCache {
             }
             getTime += System.nanoTime() - start;
             get += NB_OBJ;
-            cache.clean();
+            cache.evictAll();
 
             System.out.println("Iteration : " + j);
             double getTimeSecond = getTime / (double) (1000 * 1000 * 1000);
@@ -54,8 +60,6 @@ public class BenchCache {
 
 
             System.out.println("Real object size : " + objectSizeInMemory + " MB");
-            System.out.println("Memory allocated : " + allocator.getAllocatedMemory() / 1024 / 1024 + " MB");
-            System.out.println("Memory used : " + allocator.getUsedMemory() / 1024 / 1024 + " MB");
             System.out.println("Puts : " + put / putTimeSecond + " object/s");
             System.out.println("Gets : " + get / getTimeSecond + " object/s");
             System.out.println("Puts : " + (put * estimSize / 1024 / 1024) / putTimeSecond + " MB/s");
@@ -65,7 +69,5 @@ public class BenchCache {
 
         }
 
-
     }
-
 }

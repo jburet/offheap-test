@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bigcache-config xmlns="http://bigcache.org/schema/config/1.0/">
+
+    <bigcache name="users" capacity="500M"/>
+
+</bigcache-config>

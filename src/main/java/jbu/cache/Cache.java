@@ -49,10 +49,21 @@ public class Cache<K, V> {
     }
 
     public boolean remove(K key) {
+        Long addr = keys.remove(key);
+        if (addr != null) {
+            allocator.free(addr);
+            return true;
+        }
         return false;
     }
 
     public V getAndRemove(K key) {
+        Long addr = keys.remove(key);
+        if (addr != null) {
+            V res = (V) pbs.deserialize(allocator.getLoadContext(addr));
+            allocator.free(addr);
+            return res;
+        }
         return null;
     }
 

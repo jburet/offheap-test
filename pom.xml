@@ -19,11 +19,34 @@
             <version>12.0</version>
         </dependency>
         <dependency>
-            <groupId>com.google.caliper</groupId>
-            <artifactId>caliper</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.1</version>
         </dependency>
+
+
+        <!-- concurrent for benchmark -->
+        <dependency>
+            <groupId>org.apache.directmemory</groupId>
+            <artifactId>directmemory-cache</artifactId>
+            <version>0.1-incubating</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bigcache</groupId>
+            <artifactId>bigcache-core</artifactId>
+            <version>0.9</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>bigcache</id>
+            <url>http://bigcache.org/maven/repository/</url>
+        </repository>
+    </repositories>
 
 
 </project>
