@@ -1,6 +1,10 @@
 package jbu.serializer;
 
 import jbu.offheap.Allocator;
+import jbu.offheap.LoadContext;
+import jbu.testobject.LotOfInt;
+import jbu.testobject.LotOfPrimitive;
+import jbu.testobject.LotOfPrimitiveAndArray;
 import org.junit.Test;
 
 public class BenchUnsafePrimitiveBeanSerializer {
@@ -38,7 +42,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         LotOfInt res = new LotOfInt(0);
 
         long start = System.nanoTime();
@@ -94,7 +98,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         LotOfPrimitive res = new LotOfPrimitive();
 
         long start = System.nanoTime();
@@ -126,7 +130,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
             Allocator.StoreContext sc = a.getStoreContext(addr);
             pbs.serialize(c, sc);
             LotOfPrimitive res = new LotOfPrimitive();
-            Allocator.LoadContext lc = a.getLoadContext(addr);
+            LoadContext lc = a.getLoadContext(addr);
             pbs.deserialize( lc);
         }
         long time = System.nanoTime() - start;
@@ -148,7 +152,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         int intSerSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(intSerSize);
         Allocator.StoreContext sc = a.getStoreContext(addr);
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         while (true) {
             pbs.serialize(c, sc);
             pbs.deserialize( lc);
@@ -168,7 +172,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(1024);
         Allocator.StoreContext sc = a.getStoreContext(addr);
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         long start = System.nanoTime();
         for (int i = 0; i < NB_MSG_WRITE; i++) {
             pbs.serialize(c, sc);

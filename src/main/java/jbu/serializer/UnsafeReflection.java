@@ -13,6 +13,8 @@ import java.util.Map;
 public class UnsafeReflection {
 
     private static Map<Field, Long> offsetCache = new HashMap<Field, Long>();
+    private static final Unsafe unsafe = getUnsafeInstance();
+    private static final int arrayBaseOffset = unsafe.ARRAY_OBJECT_BASE_OFFSET;
 
     private static Unsafe getUnsafeInstance() {
         try {
@@ -27,7 +29,6 @@ public class UnsafeReflection {
         return null;
     }
 
-    private static final Unsafe unsafe = getUnsafeInstance();
 
     public static int getInt(Field field, Object instance) {
         long offset = getOffset(field);
@@ -84,7 +85,7 @@ public class UnsafeReflection {
     }
 
     public static void debugArray(Object array) {
-        int scale = unsafe.arrayIndexScale(array.getClass());
+        int scale = arrayIndexScale(array);
         System.out.println("Offset : " + arrayBaseOffset(array));
         System.out.println("scale : " + unsafe.arrayIndexScale(array.getClass()));
         System.out.println("b0 : " + unsafe.getInt(array, 0l));
@@ -125,13 +126,44 @@ public class UnsafeReflection {
     }
 
     public static int arrayBaseOffset(Object array) {
-        return unsafe.arrayBaseOffset(array.getClass());
+        return arrayBaseOffset;
     }
 
 
     public static int getArraySizeContentInMem(Object array) {
-        int scale = unsafe.arrayIndexScale(array.getClass());
+        int scale = arrayIndexScale(array);
         int al = getArrayLength(array);
         return scale * al;
+    }
+
+    private static int arrayIndexScale(Object array) {
+        // Use cached value from unsafe is much faster than use method unsafe.arrayIndexScale
+        if (array.getClass().equals(boolean[].class)) {
+            return Unsafe.ARRAY_BOOLEAN_INDEX_SCALE;
+        }
+        if (array.getClass().equals(char[].class)) {
+            return Unsafe.ARRAY_CHAR_INDEX_SCALE;
+        }
+        if (array.getClass().equals(byte[].class)) {
+            return Unsafe.ARRAY_BYTE_INDEX_SCALE;
+        }
+        if (array.getClass().equals(short[].class)) {
+            return Unsafe.ARRAY_SHORT_INDEX_SCALE;
+        }
+        if (array.getClass().equals(int[].class)) {
+            return Unsafe.ARRAY_INT_INDEX_SCALE;
+        }
+        if (array.getClass().equals(long[].class)) {
+            return Unsafe.ARRAY_LONG_INDEX_SCALE;
+        }
+        if (array.getClass().equals(float[].class)) {
+            return Unsafe.ARRAY_FLOAT_INDEX_SCALE;
+        }
+        if (array.getClass().equals(double[].class)) {
+            return Unsafe.ARRAY_DOUBLE_INDEX_SCALE;
+        }
+
+        return Unsafe.ARRAY_OBJECT_INDEX_SCALE;
+
     }
 }

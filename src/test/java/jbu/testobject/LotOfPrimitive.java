@@ -1,9 +1,7 @@
-package jbu.serializer;
-
-import java.util.Arrays;
+package jbu.testobject;
 
 // SIZE = 8 + 16 +8 +16+32+64+32+64
-public class LotOfPrimitiveAndArray {
+public class LotOfPrimitive {
     private boolean b1 = true;
     private boolean b2 = true;
     private boolean b3 = true;
@@ -76,21 +74,99 @@ public class LotOfPrimitiveAndArray {
     private double d7 = 42.0;
     private double d8 = 42.0;
 
-    private double[] da1 = new double[]{42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0};
-    private double[] da2 = new double[]{42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0};
-    private double[] da3 = new double[]{42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0};
-    private double[] da4 = new double[]{42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0};
-    private double[] da5 = new double[]{42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0};
-    private double[] da6 = new double[]{42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0};
-    private double[] da7 = new double[]{42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0};
-    private double[] da8 = new double[]{42.0, 43.0, 44.0, 45.0, 46.0, 47.0, 48.0, 49.0};
+    public LotOfPrimitive(boolean someValueZero) {
+        if (someValueZero) {
+            b1 = false;
+            c1 = 'z';
+            by1 = 0;
+            s1 = 0;
+            i1 = 0;
+            l1 = 0;
+            f1 = 0f;
+            d1 = 0.0;
+        }
+    }
+
+    public LotOfPrimitive() {
+
+    }
+
+    @Override
+    public String toString() {
+        return "LotOfPrimitive{" +
+                "b1=" + b1 +
+                ", b2=" + b2 +
+                ", b3=" + b3 +
+                ", b4=" + b4 +
+                ", b5=" + b5 +
+                ", b6=" + b6 +
+                ", b7=" + b7 +
+                ", b8=" + b8 +
+                ", c1=" + c1 +
+                ", c2=" + c2 +
+                ", c3=" + c3 +
+                ", c4=" + c4 +
+                ", c5=" + c5 +
+                ", c6=" + c6 +
+                ", c7=" + c7 +
+                ", c8=" + c8 +
+                ", by1=" + by1 +
+                ", by2=" + by2 +
+                ", by3=" + by3 +
+                ", by4=" + by4 +
+                ", by5=" + by5 +
+                ", by6=" + by6 +
+                ", by7=" + by7 +
+                ", by8=" + by8 +
+                ", s1=" + s1 +
+                ", s2=" + s2 +
+                ", s3=" + s3 +
+                ", s4=" + s4 +
+                ", s5=" + s5 +
+                ", s6=" + s6 +
+                ", s7=" + s7 +
+                ", s8=" + s8 +
+                ", i1=" + i1 +
+                ", i2=" + i2 +
+                ", i3=" + i3 +
+                ", i4=" + i4 +
+                ", i5=" + i5 +
+                ", i6=" + i6 +
+                ", i7=" + i7 +
+                ", i8=" + i8 +
+                ", l1=" + l1 +
+                ", l2=" + l2 +
+                ", l3=" + l3 +
+                ", l4=" + l4 +
+                ", l5=" + l5 +
+                ", l6=" + l6 +
+                ", l7=" + l7 +
+                ", l8=" + l8 +
+                ", f1=" + f1 +
+                ", f2=" + f2 +
+                ", f3=" + f3 +
+                ", f4=" + f4 +
+                ", f5=" + f5 +
+                ", f6=" + f6 +
+                ", f7=" + f7 +
+                ", f8=" + f8 +
+                ", d1=" + d1 +
+                ", d2=" + d2 +
+                ", d3=" + d3 +
+                ", d4=" + d4 +
+                ", d5=" + d5 +
+                ", d6=" + d6 +
+                ", d7=" + d7 +
+                ", d8=" + d8 +
+                '}';
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LotOfPrimitiveAndArray that = (LotOfPrimitiveAndArray) o;
+        LotOfPrimitive that = (LotOfPrimitive) o;
 
         if (b1 != that.b1) return false;
         if (b2 != that.b2) return false;
@@ -156,14 +232,6 @@ public class LotOfPrimitiveAndArray {
         if (s6 != that.s6) return false;
         if (s7 != that.s7) return false;
         if (s8 != that.s8) return false;
-        if (!Arrays.equals(da1, that.da1)) return false;
-        if (!Arrays.equals(da2, that.da2)) return false;
-        if (!Arrays.equals(da3, that.da3)) return false;
-        if (!Arrays.equals(da4, that.da4)) return false;
-        if (!Arrays.equals(da5, that.da5)) return false;
-        if (!Arrays.equals(da6, that.da6)) return false;
-        if (!Arrays.equals(da7, that.da7)) return false;
-        if (!Arrays.equals(da8, that.da8)) return false;
 
         return true;
     }
@@ -244,14 +312,6 @@ public class LotOfPrimitiveAndArray {
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         temp = d8 != +0.0d ? Double.doubleToLongBits(d8) : 0L;
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (da1 != null ? Arrays.hashCode(da1) : 0);
-        result = 31 * result + (da2 != null ? Arrays.hashCode(da2) : 0);
-        result = 31 * result + (da3 != null ? Arrays.hashCode(da3) : 0);
-        result = 31 * result + (da4 != null ? Arrays.hashCode(da4) : 0);
-        result = 31 * result + (da5 != null ? Arrays.hashCode(da5) : 0);
-        result = 31 * result + (da6 != null ? Arrays.hashCode(da6) : 0);
-        result = 31 * result + (da7 != null ? Arrays.hashCode(da7) : 0);
-        result = 31 * result + (da8 != null ? Arrays.hashCode(da8) : 0);
         return result;
     }
 }

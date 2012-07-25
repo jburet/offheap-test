@@ -1,4 +1,4 @@
-package jbu.serializer;
+package jbu.testobject;
 
 public class ArrayBooleanPrimitive {
 
@@ -10,5 +10,5 @@ public class ArrayBooleanPrimitive {
         this(new boolean[]{});
     }
 
-    boolean[] a = new boolean[]{false, false};
+    public boolean[] a = new boolean[]{false, false};
 }

@@ -1,4 +1,4 @@
-package jbu.serializer;
+package jbu.testobject;
 
 public class SomeDouble {
     private double b1;

@@ -1,4 +1,4 @@
-package jbu.serializer;
+package jbu.testobject;
 
 public class ArrayIntPrimitive {
 
@@ -10,5 +10,5 @@ public class ArrayIntPrimitive {
         this(new int[]{});
     }
 
-    int[] a = new int[]{2, 4};
+    public int[] a = new int[]{2, 4};
 }

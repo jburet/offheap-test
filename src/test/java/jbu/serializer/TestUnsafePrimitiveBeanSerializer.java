@@ -1,6 +1,8 @@
 package jbu.serializer;
 
 import jbu.offheap.Allocator;
+import jbu.offheap.LoadContext;
+import jbu.testobject.*;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -21,7 +23,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         Object res = pbs.deserialize(lc);
         assertEquals(c, res);
     }
@@ -39,7 +41,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         Object res = pbs.deserialize(lc);
         assertEquals(c, res);
     }
@@ -57,7 +59,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         Object res = pbs.deserialize(lc);
         assertEquals(c, res);
     }
@@ -75,7 +77,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         Object res = pbs.deserialize(lc);
         assertEquals(c, res);
     }
@@ -93,7 +95,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         Object res = pbs.deserialize(lc);
         assertEquals(c, res);
     }
@@ -111,7 +113,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         LotOfDouble res = (LotOfDouble) pbs.deserialize(lc);
         assertEquals(c, res);
     }
@@ -127,7 +129,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         ArrayIntPrimitive res = (ArrayIntPrimitive) pbs.deserialize(lc);
         //for (int i : res.a) {
         //    System.out.println(i);
@@ -149,7 +151,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         ArrayBooleanPrimitive res = (ArrayBooleanPrimitive) pbs.deserialize(lc);
         //for (boolean i : res.a) {
         //    System.out.println(i);
@@ -174,7 +176,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         ArrayLongPrimitive res = (ArrayLongPrimitive) pbs.deserialize(lc);
 
         assertTrue(Arrays.equals(c.a, res.a));
@@ -199,7 +201,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         Object res = pbs.deserialize(lc);
 
         assertEquals(c, res);
@@ -224,7 +226,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         pbs.serialize(c, sc);
 
         // Deser
-        Allocator.LoadContext lc = a.getLoadContext(addr);
+        LoadContext lc = a.getLoadContext(addr);
         Object res = pbs.deserialize(lc);
 
         assertEquals(c, res);

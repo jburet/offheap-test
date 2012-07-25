@@ -1,4 +1,4 @@
-package jbu.serializer;
+package jbu.testobject;
 
 public class LotOfDouble {
     private double b1;

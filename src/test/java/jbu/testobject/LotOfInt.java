@@ -1,4 +1,4 @@
-package jbu.serializer;
+package jbu.testobject;
 
 public class LotOfInt {
     private int a = 42;

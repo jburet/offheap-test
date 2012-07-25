@@ -1,4 +1,4 @@
-package jbu.serializer;
+package jbu.testobject;
 
 public class ArrayLongPrimitive {
 
@@ -10,5 +10,5 @@ public class ArrayLongPrimitive {
         this(new long[]{});
     }
 
-    long[] a = new long[]{9, 9};
+    public long[] a = new long[]{9, 9};
 }

@@ -1,4 +1,4 @@
-package jbu.serializer;
+package jbu.testobject;
 
 import java.util.Arrays;
 

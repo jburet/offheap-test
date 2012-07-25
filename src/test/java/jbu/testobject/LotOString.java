@@ -1,4 +1,4 @@
-package jbu.serializer;
+package jbu.testobject;
 
 public class LotOString {
     private String a = "aazemlkfsdfùklgjsmkgdsfgertrieogjfdmknsdf;g,fsmdglkjerfesmfdkgndfsg;n:,dfgnds;:fvcxv dfkglmjerfuizoehfsdlfhskdljhfskdlfh";
