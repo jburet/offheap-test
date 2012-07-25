@@ -28,6 +28,13 @@ public class Cache<K, V> {
         this.keys = new HashMap<K, Long>();
     }
 
+    public Cache(String name, Allocator allocator, Serializer serializer) {
+        this.name = name;
+        this.allocator = allocator;
+        this.pbs = serializer;
+        this.keys = new HashMap<K, Long>();
+    }
+
     /**
      * Store the Object value with the key K.
      * This method return addr where K is serialized.

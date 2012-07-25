@@ -1,6 +1,7 @@
 package jbu.cache;
 
 import jbu.offheap.Allocator;
+import jbu.serializer.kryo.KryoSerializer;
 import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
 import jbu.testobject.LotOfPrimitiveAndArray;
 import org.junit.Test;
@@ -28,7 +29,7 @@ public class BenchCache {
         long get = 0;
 
         Allocator allocator = new Allocator(1024 * 1024 * 1024);
-        Cache<Integer, LotOfPrimitiveAndArray> cache = new Cache<Integer, LotOfPrimitiveAndArray>("testCache", allocator);
+        Cache<Integer, LotOfPrimitiveAndArray> cache = new Cache<Integer, LotOfPrimitiveAndArray>("testCache", allocator, new KryoSerializer());
         LotOfPrimitiveAndArray cachedObject = new LotOfPrimitiveAndArray();
         int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
