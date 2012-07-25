@@ -1,7 +1,8 @@
 package jbu.cache;
 
 import jbu.offheap.Allocator;
-import jbu.serializer.UnsafePrimitiveBeanSerializer;
+import jbu.serializer.Serializer;
+import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +11,7 @@ public class Cache<K, V> {
 
     private final String name;
     private final Allocator allocator;
-    private final UnsafePrimitiveBeanSerializer pbs;
+    private final Serializer pbs;
     private final Map<K, Long> keys;
 
     public Cache(String name, int approxSize) {

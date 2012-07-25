@@ -1,6 +1,5 @@
 package jbu.offheap;
 
-import jbu.serializer.Type;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;

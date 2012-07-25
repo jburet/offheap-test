@@ -1,9 +1,7 @@
 package jbu.cache;
 
-import jbu.serializer.UnsafePrimitiveBeanSerializer;
+import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
 import jbu.testobject.LotOfPrimitiveAndArray;
-import org.apache.directmemory.DirectMemory;
-import org.apache.directmemory.cache.CacheService;
 import org.bigcache.BigCache;
 import org.bigcache.BigCacheManager;
 import org.junit.Test;

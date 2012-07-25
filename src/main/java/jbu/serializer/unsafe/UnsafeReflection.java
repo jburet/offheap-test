@@ -1,4 +1,4 @@
-package jbu.serializer;
+package jbu.serializer.unsafe;
 
 import sun.misc.Unsafe;
 

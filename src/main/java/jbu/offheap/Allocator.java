@@ -1,6 +1,5 @@
 package jbu.offheap;
 
-import jbu.serializer.Type;
 import sun.misc.Unsafe;
 
 import javax.management.*;

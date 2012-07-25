@@ -3,6 +3,7 @@ package jbu.serializer;
 import jbu.offheap.Allocator;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
+import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
 import jbu.testobject.LotOfInt;
 import jbu.testobject.LotOfPrimitive;
 import jbu.testobject.LotOfPrimitiveAndArray;
@@ -14,7 +15,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     public void bench_ser_simple_int_bean() {
         Allocator a = new Allocator(50 * 1024 * 1024);
         int NB_MSG_WRITE = 10000000;
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         StoreContext sc = a.getStoreContext(a.alloc(9 * 4));
         LotOfInt c = new LotOfInt(42);
         long start = System.nanoTime();
@@ -35,7 +36,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     @Test
     public void bench_deser_simple_int_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(9 * 4);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -66,7 +67,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     public void bench_ser_simple_bean() {
         Allocator a = new Allocator(50 * 1024 * 1024);
         int NB_MSG_WRITE = 1000000;
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
         int serSize = pbs.estimateSerializedSize(c);
         System.out.println("Serialized size: " + serSize);
@@ -89,7 +90,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     @Test
     public void bench_deser_simple_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
@@ -121,7 +122,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     public void bench_alloc_ser_deser_simple_bean() {
         Allocator a = new Allocator(500 * 1024 * 1024);
         int NB_MSG_WRITE = 1000000;
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
         int serSize = pbs.estimateSerializedSize(c);
         long start = System.nanoTime();
@@ -146,7 +147,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     public void bench_alloc_ser_deser_simple_bean_inf() {
         Allocator a = new Allocator(500 * 1024 * 1024);
         int NB_MSG_WRITE = 1000000;
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
         LotOfPrimitive res = new LotOfPrimitive();
         int serSize = pbs.estimateSerializedSize(c);
@@ -167,7 +168,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     public void bench_alloc_ser_deser_simple_bean_witharray() {
         Allocator a = new Allocator(500 * 1024 * 1024);
         int NB_MSG_WRITE = 1000000;
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitiveAndArray c = new LotOfPrimitiveAndArray();
         LotOfPrimitiveAndArray res = new LotOfPrimitiveAndArray();
         int serSize = pbs.estimateSerializedSize(c);

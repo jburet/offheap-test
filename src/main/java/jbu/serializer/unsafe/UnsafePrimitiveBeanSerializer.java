@@ -1,18 +1,19 @@
-package jbu.serializer;
+package jbu.serializer.unsafe;
 
 
-import jbu.offheap.Allocator;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
 import jbu.offheap.UnsafeUtil;
+import jbu.serializer.Serializer;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Array;
 
-public class UnsafePrimitiveBeanSerializer {
+public class UnsafePrimitiveBeanSerializer implements Serializer {
 
     private static final Unsafe unsafe = UnsafeUtil.unsafe;
 
+    @Override
     public void serialize(Object obj, StoreContext sc) {
         Class clazz = obj.getClass();
         ClassDesc cd = ClassDesc.resolveByClass(clazz);
@@ -39,6 +40,7 @@ public class UnsafePrimitiveBeanSerializer {
      *
      * @param lc
      */
+    @Override
     public Object deserialize(LoadContext lc) {
         ClassDesc cd = ClassDesc.resolveByRef(lc.loadInt());
         Object res = null;
@@ -75,6 +77,7 @@ public class UnsafePrimitiveBeanSerializer {
         return res;
     }
 
+    @Override
     public int estimateSerializedSize(Object obj) {
         Class clazz = obj.getClass();
         ClassDesc cd = ClassDesc.resolveByClass(clazz);

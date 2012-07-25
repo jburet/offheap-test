@@ -1,7 +1,7 @@
 package jbu.cache;
 
 import jbu.offheap.Allocator;
-import jbu.serializer.UnsafePrimitiveBeanSerializer;
+import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
 import jbu.testobject.LotOfPrimitiveAndArray;
 import org.junit.Test;
 

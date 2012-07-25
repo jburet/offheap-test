@@ -3,6 +3,7 @@ package jbu.serializer;
 import jbu.offheap.Allocator;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
+import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
 import jbu.testobject.*;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_int_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(9 * 4);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -32,7 +33,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
@@ -50,7 +51,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_boolean_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfBoolean c = new LotOfBoolean(true);
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
@@ -68,7 +69,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_char_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfChar c = new LotOfChar('a');
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
@@ -86,7 +87,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_few_double_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         SomeDouble c = new SomeDouble(1);
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
@@ -104,7 +105,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_double_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfDouble c = new LotOfDouble(1);
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(serSize);
@@ -122,7 +123,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_array_int_primitive_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(64);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -144,7 +145,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_array_boolean_primitive_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(64);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -166,7 +167,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_array_long_primitive_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         ArrayLongPrimitive c = new ArrayLongPrimitive(new long[]{1, 2, 5, 10, 20});
         System.out.println(pbs.estimateSerializedSize(c));
         long addr = a.alloc(2048);
@@ -191,7 +192,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_with_all_type_primitive_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitiveAndArray c = new LotOfPrimitiveAndArray();
         System.out.println(pbs.estimateSerializedSize(c));
         long addr = a.alloc(2048);
@@ -216,7 +217,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     @Test
     public void test_ser_deser_simple_double_array_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
-        UnsafePrimitiveBeanSerializer pbs = new UnsafePrimitiveBeanSerializer();
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfDoubleArray c = new LotOfDoubleArray();
         System.out.println(pbs.estimateSerializedSize(c));
         long addr = a.alloc(1024);
