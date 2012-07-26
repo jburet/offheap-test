@@ -4,6 +4,7 @@ import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
 import jbu.offheap.UnsafeUtil;
 import jbu.serializer.unsafe.ClassDesc;
+import jbu.serializer.unsafe.Type;
 import jbu.serializer.unsafe.UnsafeReflection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,11 @@ public class StringSerializer extends TypeSerializer<String> {
 
     @Override
     public void serialize(Object sourceObject, StoreContext sc, ClassDesc cd, int fieldIndex) {
-        Object string = unsafe.getObject(sourceObject, cd.offsets[fieldIndex]);
+        serialize((String) unsafe.getObject(sourceObject, cd.offsets[fieldIndex]), cd.types[fieldIndex], sc);
+    }
+
+    @Override
+    public void serialize(String string, Type type, StoreContext sc) {
         // For serializing String
 
         // get his offset
@@ -52,14 +57,15 @@ public class StringSerializer extends TypeSerializer<String> {
         // Store only length on 4 Bytes
         sc.storeInt(count);
         sc.storeSomething(internalArray, begin, length);
-
     }
 
     @Override
-    public void deserialize(LoadContext lc, ClassDesc cd, Object dest, int index) {
+    public void deserialize(LoadContext lc, ClassDesc cd, Object dest, int fieldIndex) {
+        UnsafeReflection.setObject(cd.fields[fieldIndex], dest, deserialize(cd.types[fieldIndex], lc));
+    }
 
-        Object string = unsafe.getObject(dest, cd.offsets[index]);
-        // For serializing String
+    @Override
+    public String deserialize(Type type, LoadContext lc) {
         // get his length
         int stringLength = lc.loadInt();
         // recreate a char[] with content
@@ -73,7 +79,6 @@ public class StringSerializer extends TypeSerializer<String> {
         UnsafeReflection.setInt(OFFSET, destString, 0);
         UnsafeReflection.setInt(COUNT, destString, stringLength);
         UnsafeReflection.setObject(VALUE, destString, internalArray);
-        // FIXME must be replaced by unsafe impl
-        UnsafeReflection.setObject(cd.fields[index], dest, destString);
+        return destString;
     }
 }

@@ -3,92 +3,119 @@ package jbu.serializer.unsafe;
 import jbu.serializer.unsafe.type.*;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Type {
+
+    private final static Map<Integer, Type> mapByTypeRef = new HashMap<Integer, Type>();
 
     // Primitive Type
     private final static PrimitiveSerializer primitiveSerializer = new PrimitiveSerializer();
     private final static PrimitiveArraySerializer primitiveArraySerializer = new PrimitiveArraySerializer();
-    public static final Type BOOLEAN = new Type((short) 1, (short) 0, (byte) 1, false, primitiveSerializer);
+    public static final Type BOOLEAN = new Type(1, (short) 0, (byte) 1, false, primitiveSerializer, boolean.class);
+    public static final Type CHAR = new Type(2, (short) 0, (byte) 2, false, primitiveSerializer, char.class);
+    public static final Type BYTE = new Type(3, (short) 0, (byte) 1, false, primitiveSerializer, byte.class);
+    public static final Type SHORT = new Type(4, (short) 0, (byte) 2, false, primitiveSerializer, short.class);
+    public static final Type INT = new Type(5, (short) 0, (byte) 4, false, primitiveSerializer, int.class);
+    public static final Type LONG = new Type(6, (short) 0, (byte) 8, false, primitiveSerializer, long.class);
+    public static final Type FLOAT = new Type(7, (short) 0, (byte) 4, false, primitiveSerializer, float.class);
+    public static final Type DOUBLE = new Type(8, (short) 0, (byte) 8, false, primitiveSerializer, double.class);
 
-    public static Type BOOLEAN_ARRAY(short arrayProof) {
-        return new Type((short) 1, arrayProof, (byte) 1, true, primitiveArraySerializer);
+
+    // Array type
+    public static Type BOOLEAN_ARRAY(int arrayProof) {
+        return new Type(11, arrayProof, (byte) 1, true, primitiveArraySerializer, boolean.class);
     }
 
-    public static final Type CHAR = new Type((short) 2, (short) 0, (byte) 2, false, primitiveSerializer);
-
-    public static Type CHAR_ARRAY(short arrayProof) {
-        return new Type((short) 2, arrayProof, (byte) 2, true, primitiveArraySerializer);
+    public static Type CHAR_ARRAY(int arrayProof) {
+        return new Type(12, arrayProof, (byte) 2, true, primitiveArraySerializer, char.class);
     }
 
-    public static final Type BYTE = new Type((short) 3, (short) 0, (byte) 1, false, primitiveSerializer);
-
-    public static Type BYTE_ARRAY(short arrayProof) {
-        return new Type((short) 3, arrayProof, (byte) 1, true, primitiveArraySerializer);
+    public static Type BYTE_ARRAY(int arrayProof) {
+        return new Type(13, arrayProof, (byte) 1, true, primitiveArraySerializer, byte.class);
     }
 
-    public static final Type SHORT = new Type((short) 4, (short) 0, (byte) 2, false, primitiveSerializer);
-
-    public static Type SHORT_ARRAY(short arrayProof) {
-        return new Type((short) 4, arrayProof, (byte) 2, true, primitiveArraySerializer);
+    public static Type SHORT_ARRAY(int arrayProof) {
+        return new Type(14, arrayProof, (byte) 2, true, primitiveArraySerializer, short.class);
     }
 
-    public static final Type INT = new Type((short) 5, (short) 0, (byte) 4, false, primitiveSerializer);
-
-    public static Type INT_ARRAY(short arrayProof) {
-        return new Type((short) 5, arrayProof, (byte) 4, true, primitiveArraySerializer);
+    public static Type INT_ARRAY(int arrayProof) {
+        return new Type(15, arrayProof, (byte) 4, true, primitiveArraySerializer, int.class);
     }
 
-    public static final Type LONG = new Type((short) 6, (short) 0, (byte) 8, false, primitiveSerializer);
-
-    public static Type LONG_ARRAY(short arrayProof) {
-        return new Type((short) 6, arrayProof, (byte) 8, true, primitiveArraySerializer);
+    public static Type LONG_ARRAY(int arrayProof) {
+        return new Type(16, arrayProof, (byte) 8, true, primitiveArraySerializer, long.class);
     }
 
-    public static final Type FLOAT = new Type((short) 7, (short) 0, (byte) 4, false, primitiveSerializer);
-
-    public static Type FLOAT_ARRAY(short arrayProof) {
-        return new Type((short) 7, arrayProof, (byte) 4, true, primitiveArraySerializer);
+    public static Type FLOAT_ARRAY(int arrayProof) {
+        return new Type(17, arrayProof, (byte) 4, true, primitiveArraySerializer, float.class);
     }
 
-    public static final Type DOUBLE = new Type((short) 8, (short) 0, (byte) 8, false, primitiveSerializer);
-
-    public static Type DOUBLE_ARRAY(short arrayProof) {
-        return new Type((short) 8, arrayProof, (byte) 8, true, primitiveArraySerializer);
+    public static Type DOUBLE_ARRAY(int arrayProof) {
+        return new Type(18, arrayProof, (byte) 8, true, primitiveArraySerializer, double.class);
     }
+
+    // Collection
+    public static final Type COLLECTION = new Type(5000, new CollectionSerializer(), Collection.class);
 
     // Standard java type
-    public static final Type STRING = new Type((short) 9, new StringSerializer());
+    public static final Type STRING = new Type(10000, new StringSerializer(), String.class);
+    public static final Type OBJECT = new Type(0, new DefaultSerializer(), Object.class);
 
+    static {
+        mapByTypeRef.put(0, OBJECT);
+        mapByTypeRef.put(1, BOOLEAN);
+        mapByTypeRef.put(2, CHAR);
+        mapByTypeRef.put(3, BYTE);
+        mapByTypeRef.put(4, SHORT);
+        mapByTypeRef.put(5, INT);
+        mapByTypeRef.put(6, LONG);
+        mapByTypeRef.put(7, FLOAT);
+        mapByTypeRef.put(8, DOUBLE);
+        mapByTypeRef.put(1001, BOOLEAN_ARRAY(1));
+        mapByTypeRef.put(1501, CHAR_ARRAY(1));
+        mapByTypeRef.put(2001, BYTE_ARRAY(1));
+        mapByTypeRef.put(2501, SHORT_ARRAY(1));
+        mapByTypeRef.put(3001, INT_ARRAY(1));
+        mapByTypeRef.put(3501, LONG_ARRAY(1));
+        mapByTypeRef.put(4001, FLOAT_ARRAY(1));
+        mapByTypeRef.put(4501, DOUBLE_ARRAY(1));
+        mapByTypeRef.put(5000, COLLECTION);
+        mapByTypeRef.put(10000, STRING);
 
-    public static final Type OBJECT = new Type((short) 0, new DefaultSerializer());
+    }
 
-    public final short type;
-    public final short arrayProof;
+    public final int type;
+    public final int arrayProof;
     public final byte typeSize;
     public final boolean isArray;
     public final boolean isPrimitive;
     public final TypeSerializer typeSerializer;
+    public final Class<?> clazz;
 
 
     // Construct primitive (array or not) type
-    private Type(short type, short arrayProof, byte typeSize, boolean isArray, TypeSerializer typeSerializer) {
+    private Type(int type, int arrayProof, byte typeSize, boolean isArray, TypeSerializer typeSerializer, Class<?> clazz) {
         this.type = type;
         this.arrayProof = arrayProof;
         this.typeSize = typeSize;
         this.isArray = isArray;
         this.isPrimitive = true;
         this.typeSerializer = typeSerializer;
+        this.clazz = clazz;
     }
 
     // Construct object type
-    private Type(short type, TypeSerializer typeSerializer) {
+    private Type(int type, TypeSerializer typeSerializer, Class<?> clazz) {
         this.type = type;
         this.arrayProof = -1;
         this.typeSize = -1;
         this.isArray = false;
         this.isPrimitive = false;
         this.typeSerializer = typeSerializer;
+        this.clazz = clazz;
     }
 
     public static Type resolveType(Field f) {
@@ -150,6 +177,9 @@ public class Type {
             if (code.equals("D")) {
                 return DOUBLE_ARRAY(arrayProof);
             }
+            // COLLECTION
+        } else if (Collection.class.isAssignableFrom(clazz)) {
+            return COLLECTION;
         } else {
             String tname = clazz.getName();
             if (tname.equals("java.lang.String")) {
@@ -157,6 +187,10 @@ public class Type {
             }
         }
         return OBJECT;
+    }
+
+    public static Type resolveType(int i) {
+        return mapByTypeRef.get(i);
     }
 
     private static short getProof(String tname) {
@@ -183,4 +217,6 @@ public class Type {
         }
         return totalLength * typeSize;
     }
+
+
 }

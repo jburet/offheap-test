@@ -7,6 +7,7 @@ import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
 import jbu.testobject.*;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -133,9 +134,9 @@ public class TestUnsafePrimitiveBeanSerializer {
         // Deser
         LoadContext lc = a.getLoadContext(addr);
         ArrayIntPrimitive res = (ArrayIntPrimitive) pbs.deserialize(lc);
-        //for (int i : res.a) {
-        //    System.out.println(i);
-        //}
+        for (int i : res.a) {
+            System.out.println(i);
+        }
 
         assertTrue(Arrays.equals(c.a, res.a));
         // estimated size
@@ -245,6 +246,36 @@ public class TestUnsafePrimitiveBeanSerializer {
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfString c = new LotOfString();
         c.a = "test";
+        System.out.println(pbs.estimateSerializedSize(c));
+        long addr = a.alloc(4000);
+        // Serialize
+        StoreContext sc = a.getStoreContext(addr);
+
+        //UnsafeReflection.debugArray(c.a);
+        pbs.serialize(c, sc);
+
+        // Deser
+        LoadContext lc = a.getLoadContext(addr);
+        Object res = pbs.deserialize(lc);
+
+        assertEquals(c, res);
+        //for(long i : res.a){
+        //    System.out.println(i);
+        //}
+        // estimated size
+        int serSize = pbs.estimateSerializedSize(c);
+    }
+
+    @Test
+    public void test_ser_deser_simple_arraylist_bean() {
+        Allocator a = new Allocator(1 * 1024 * 1024);
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
+        ObjectWithArrayList c = new ObjectWithArrayList();
+        c.collection = new ArrayList<String>();
+        c.collection.add("a");
+        c.collection.add("ab");
+        c.collection.add("abc");
+        c.collection.add("abcd");
         System.out.println(pbs.estimateSerializedSize(c));
         long addr = a.alloc(4000);
         // Serialize
