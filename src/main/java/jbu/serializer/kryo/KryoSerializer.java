@@ -12,7 +12,7 @@ public class KryoSerializer implements Serializer {
 
     @Override
     public void serialize(Object obj, StoreContext sc) {
-        Kryo kryo = new Kryo();
+        Kryo kryo = KryoFactory.getInstance();
         Output out = new Output(2048);
         kryo.writeClassAndObject(out, obj);
         byte[] ser = out.toBytes();
@@ -25,7 +25,7 @@ public class KryoSerializer implements Serializer {
         int serSize = lc.loadInt();
         byte[] ser = new byte[serSize];
         lc.loadArray(ser, UnsafeReflection.arrayBaseOffset(ser), UnsafeReflection.getArraySizeContentInMem(ser));
-        Kryo kryo = new Kryo();
+        Kryo kryo = KryoFactory.getInstance();
         Input in = new Input(ser);
         Object res = kryo.readClassAndObject(in);
         return res;

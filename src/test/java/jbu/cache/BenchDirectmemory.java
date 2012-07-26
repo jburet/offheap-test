@@ -1,6 +1,9 @@
 package jbu.cache;
 
 import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
+import jbu.testobject.LotOfBoolean;
+import jbu.testobject.LotOfDoubleArray;
+import jbu.testobject.LotOfPrimitive;
 import jbu.testobject.LotOfPrimitiveAndArray;
 import org.apache.directmemory.DirectMemory;
 import org.apache.directmemory.cache.CacheService;
@@ -26,21 +29,21 @@ public class BenchDirectmemory {
         } catch (InterruptedException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        int NB_OBJ = 10000;
+        int NB_OBJ = 100000;
 
         long putTime = 0;
         long put = 0;
         long getTime = 0;
         long get = 0;
 
-        CacheService<Integer, LotOfPrimitiveAndArray> cacheService = new DirectMemory<Integer, LotOfPrimitiveAndArray>()
+        CacheService<Integer, LotOfPrimitive> cacheService = new DirectMemory<Integer, LotOfPrimitive>()
                 .setNumberOfBuffers(1)
-                .setSize(10000 * 1024)
-                .setInitialCapacity(10000)
-                .setConcurrencyLevel(4)
+                .setSize(100 * 1024 * 1024)
+                .setInitialCapacity(NB_OBJ)
+                .setConcurrencyLevel(1)
                 .newCacheService();
 
-        LotOfPrimitiveAndArray cachedObject = new LotOfPrimitiveAndArray();
+        LotOfPrimitive cachedObject = new LotOfPrimitive();
         int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
 

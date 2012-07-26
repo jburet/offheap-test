@@ -1,6 +1,8 @@
 package jbu.testobject;
 
-public class LotOfBoolean {
+import java.io.Serializable;
+
+public class LotOfBoolean implements Serializable {
     private boolean b1;
     private boolean b3;
     private boolean b2;

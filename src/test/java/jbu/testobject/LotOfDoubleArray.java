@@ -1,8 +1,9 @@
 package jbu.testobject;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class LotOfDoubleArray {
+public class LotOfDoubleArray implements Serializable {
     private double[] d1 = new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     private double[] d2 = new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     private double[] d3 = new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};

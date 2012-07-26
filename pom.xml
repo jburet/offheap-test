@@ -23,6 +23,11 @@
             <artifactId>logback-classic</artifactId>
             <version>1.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware.kryo</groupId>
+            <artifactId>kryo</artifactId>
+            <version>2.16</version>
+        </dependency>
 
 
         <!-- concurrent for benchmark -->
@@ -36,6 +41,12 @@
             <groupId>org.bigcache</groupId>
             <artifactId>bigcache-core</artifactId>
             <version>0.9</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.whalin</groupId>
+            <artifactId>Memcached-Java-Client</artifactId>
+            <version>3.0.0</version>
             <scope>test</scope>
         </dependency>
 

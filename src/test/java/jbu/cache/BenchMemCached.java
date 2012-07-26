@@ -1,21 +1,32 @@
 package jbu.cache;
 
-import jbu.offheap.Allocator;
-import jbu.serializer.kryo.KryoFactory;
+import com.whalin.MemCached.MemCachedClient;
+import com.whalin.MemCached.SockIOPool;
 import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
-import jbu.testobject.LotOfPrimitive;
+import jbu.testobject.LotOfPrimitiveAndArray;
+import org.bigcache.BigCache;
+import org.bigcache.BigCacheManager;
 import org.junit.Test;
 
-public class BenchCache {
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+import static org.junit.Assert.assertEquals;
+
+public class BenchMemCached {
 
     @Test
-    public void bench_put_get() {
-        // FIXME Kryo memory leak on not registered class
-        KryoFactory.getInstance().register(LotOfPrimitive.class);
+    public void bench_put_get() throws FileNotFoundException {
+
+        SockIOPool pool = SockIOPool.getInstance();
+        pool.setServers(new String[]{"localhost:11211"});
+        pool.initialize();
+
         // Put n object in map
         // Get them all
         // Remove them
         // etc...
+
         int NB_OBJ = 100000;
 
         long putTime = 0;
@@ -23,26 +34,27 @@ public class BenchCache {
         long getTime = 0;
         long get = 0;
 
-        Allocator allocator = new Allocator(1024 * 1024 * 1024);
-        Cache<Integer, LotOfPrimitive> cache = new Cache<Integer, LotOfPrimitive>("testCache", allocator, new UnsafePrimitiveBeanSerializer());
-        LotOfPrimitive cachedObject = new LotOfPrimitive();
+        MemCachedClient mClient = new MemCachedClient();
+
+        LotOfPrimitiveAndArray cachedObject = new LotOfPrimitiveAndArray();
         int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
-        for (int j = 0; j < 100; j++) {
+
+        for (int j = 0; j < NB_OBJ; j++) {
             long start = System.nanoTime();
             for (int i = 0; i < NB_OBJ; i++) {
-                cache.put(i, cachedObject);
+                mClient.set(Integer.toString(i), cachedObject);
             }
             putTime += System.nanoTime() - start;
             put += NB_OBJ;
 
             start = System.nanoTime();
             for (int i = 0; i < NB_OBJ; i++) {
-                cache.get(i);
+                mClient.get(Integer.toString(i));
             }
             getTime += System.nanoTime() - start;
             get += NB_OBJ;
-            cache.clean();
+            mClient.flushAll();
 
             System.out.println("Iteration : " + j);
             double getTimeSecond = getTime / (double) (1000 * 1000 * 1000);
@@ -50,8 +62,6 @@ public class BenchCache {
 
 
             System.out.println("Real object size : " + objectSizeInMemory + " MB");
-            System.out.println("Memory allocated : " + allocator.getAllocatedMemory() / 1024 / 1024 + " MB");
-            System.out.println("Memory used : " + allocator.getUsedMemory() / 1024 / 1024 + " MB");
             System.out.println("Puts : " + put / putTimeSecond + " object/s");
             System.out.println("Gets : " + get / getTimeSecond + " object/s");
             System.out.println("Puts : " + (put * estimSize / 1024 / 1024) / putTimeSecond + " MB/s");
@@ -61,7 +71,5 @@ public class BenchCache {
 
         }
 
-
     }
-
 }

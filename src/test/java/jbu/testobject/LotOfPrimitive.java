@@ -1,7 +1,9 @@
 package jbu.testobject;
 
+import java.io.Serializable;
+
 // SIZE = 8 + 16 +8 +16+32+64+32+64
-public class LotOfPrimitive {
+public class LotOfPrimitive implements Serializable {
     private boolean b1 = true;
     private boolean b2 = true;
     private boolean b3 = true;
