@@ -3,12 +3,9 @@ package jbu.cache;
 import com.whalin.MemCached.MemCachedClient;
 import com.whalin.MemCached.SockIOPool;
 import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
-import jbu.testobject.LotOfPrimitiveAndArray;
-import org.bigcache.BigCache;
-import org.bigcache.BigCacheManager;
+import jbu.testobject.LotOfPrimitiveAndArrayAndString;
 import org.junit.Test;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import static org.junit.Assert.assertEquals;
@@ -36,7 +33,7 @@ public class BenchMemCached {
 
         MemCachedClient mClient = new MemCachedClient();
 
-        LotOfPrimitiveAndArray cachedObject = new LotOfPrimitiveAndArray();
+        LotOfPrimitiveAndArrayAndString cachedObject = new LotOfPrimitiveAndArrayAndString();
         int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
 

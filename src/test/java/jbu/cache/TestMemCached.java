@@ -2,9 +2,7 @@ package jbu.cache;
 
 import com.whalin.MemCached.MemCachedClient;
 import com.whalin.MemCached.SockIOPool;
-import jbu.testobject.LotOfPrimitiveAndArray;
-import org.apache.directmemory.DirectMemory;
-import org.apache.directmemory.cache.CacheService;
+import jbu.testobject.LotOfPrimitiveAndArrayAndString;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -17,9 +15,9 @@ public class TestMemCached {
         pool.setServers(new String[]{"localhost:11211"});
         pool.initialize();
         MemCachedClient mClient = new MemCachedClient();
-        LotOfPrimitiveAndArray cachedObject = new LotOfPrimitiveAndArray();
+        LotOfPrimitiveAndArrayAndString cachedObject = new LotOfPrimitiveAndArrayAndString();
         mClient.set("1", cachedObject);
-        LotOfPrimitiveAndArray res = (LotOfPrimitiveAndArray) mClient.get("1");
+        LotOfPrimitiveAndArrayAndString res = (LotOfPrimitiveAndArrayAndString) mClient.get("1");
         assertEquals(cachedObject, res);
     }
 

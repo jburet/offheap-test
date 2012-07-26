@@ -6,7 +6,7 @@ import jbu.offheap.StoreContext;
 import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
 import jbu.testobject.LotOfInt;
 import jbu.testobject.LotOfPrimitive;
-import jbu.testobject.LotOfPrimitiveAndArray;
+import jbu.testobject.LotOfPrimitiveAndArrayAndString;
 import org.junit.Test;
 
 public class BenchUnsafePrimitiveBeanSerializer {
@@ -169,8 +169,8 @@ public class BenchUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(500 * 1024 * 1024);
         int NB_MSG_WRITE = 1000000;
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
-        LotOfPrimitiveAndArray c = new LotOfPrimitiveAndArray();
-        LotOfPrimitiveAndArray res = new LotOfPrimitiveAndArray();
+        LotOfPrimitiveAndArrayAndString c = new LotOfPrimitiveAndArrayAndString();
+        LotOfPrimitiveAndArrayAndString res = new LotOfPrimitiveAndArrayAndString();
         int serSize = pbs.estimateSerializedSize(c);
         long addr = a.alloc(1024);
         StoreContext sc = a.getStoreContext(addr);

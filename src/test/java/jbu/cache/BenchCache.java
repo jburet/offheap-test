@@ -4,6 +4,7 @@ import jbu.offheap.Allocator;
 import jbu.serializer.kryo.KryoFactory;
 import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
 import jbu.testobject.LotOfPrimitive;
+import jbu.testobject.LotOfPrimitiveAndArrayAndString;
 import org.junit.Test;
 
 public class BenchCache {
@@ -24,10 +25,12 @@ public class BenchCache {
         long get = 0;
 
         Allocator allocator = new Allocator(1024 * 1024 * 1024);
-        Cache<Integer, LotOfPrimitive> cache = new Cache<Integer, LotOfPrimitive>("testCache", allocator, new UnsafePrimitiveBeanSerializer());
-        LotOfPrimitive cachedObject = new LotOfPrimitive();
+        Cache<Integer, LotOfPrimitiveAndArrayAndString> cache = new Cache<Integer, LotOfPrimitiveAndArrayAndString>("testCache", allocator, new UnsafePrimitiveBeanSerializer());
+        LotOfPrimitiveAndArrayAndString cachedObject = new LotOfPrimitiveAndArrayAndString();
         int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
+        System.out.println("Object size  : " + estimSize);
+        System.out.println("Store : " + NB_OBJ);
         for (int j = 0; j < 100; j++) {
             long start = System.nanoTime();
             for (int i = 0; i < NB_OBJ; i++) {
@@ -42,7 +45,7 @@ public class BenchCache {
             }
             getTime += System.nanoTime() - start;
             get += NB_OBJ;
-            cache.clean();
+
 
             System.out.println("Iteration : " + j);
             double getTimeSecond = getTime / (double) (1000 * 1000 * 1000);
@@ -58,7 +61,7 @@ public class BenchCache {
             System.out.println("Gets : " + (get * estimSize / 1024 / 1024) / getTimeSecond + " MB/s");
             System.out.println("");
             System.out.println("");
-
+            cache.clean();
         }
 
 

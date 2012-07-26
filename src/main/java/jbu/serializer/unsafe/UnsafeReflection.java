@@ -1,5 +1,6 @@
 package jbu.serializer.unsafe;
 
+import jbu.offheap.UnsafeUtil;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -13,26 +14,18 @@ import java.util.Map;
 public class UnsafeReflection {
 
     private static Map<Field, Long> offsetCache = new HashMap<Field, Long>();
-    private static final Unsafe unsafe = getUnsafeInstance();
+    private static final Unsafe unsafe = UnsafeUtil.unsafe;
     private static final int arrayBaseOffset = unsafe.ARRAY_OBJECT_BASE_OFFSET;
-
-    private static Unsafe getUnsafeInstance() {
-        try {
-            Field theUnsafeInstance = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafeInstance.setAccessible(true);
-            return (Unsafe) theUnsafeInstance.get(Unsafe.class);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-        return null;
-    }
 
 
     public static int getInt(Field field, Object instance) {
         long offset = getOffset(field);
         return unsafe.getInt(instance, offset);
+    }
+
+    public static void setInt(Field field, Object instance, int value) {
+        long offset = getOffset(field);
+        unsafe.putInt(instance, offset, value);
     }
 
     public static boolean getBoolean(Field field, Object instance) {
@@ -73,6 +66,11 @@ public class UnsafeReflection {
     public static Object getObject(Field field, Object instance) {
         long offset = getOffset(field);
         return unsafe.getObject(instance, offset);
+    }
+
+    public static void setObject(Field field, Object instance, Object objectToCopy) {
+        long offset = getOffset(field);
+        unsafe.putObject(instance, offset, objectToCopy);
     }
 
     public static long getOffset(Field field) {
@@ -136,7 +134,7 @@ public class UnsafeReflection {
         return scale * al;
     }
 
-    private static int arrayIndexScale(Object array) {
+    public static int arrayIndexScale(Object array) {
         // Use cached value from unsafe is much faster than use method unsafe.arrayIndexScale
         if (array.getClass().equals(boolean[].class)) {
             return Unsafe.ARRAY_BOOLEAN_INDEX_SCALE;

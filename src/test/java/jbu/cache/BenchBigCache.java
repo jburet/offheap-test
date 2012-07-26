@@ -1,7 +1,7 @@
 package jbu.cache;
 
 import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
-import jbu.testobject.LotOfPrimitiveAndArray;
+import jbu.testobject.LotOfPrimitiveAndArrayAndString;
 import org.bigcache.BigCache;
 import org.bigcache.BigCacheManager;
 import org.junit.Test;
@@ -32,7 +32,7 @@ public class BenchBigCache {
         BigCacheManager bigCacheManager = BigCacheManager.configure(new FileInputStream("src/test/resources/bigcache-config.xml"));
         BigCache cache = bigCacheManager.getCache("users");
 
-        LotOfPrimitiveAndArray cachedObject = new LotOfPrimitiveAndArray();
+        LotOfPrimitiveAndArrayAndString cachedObject = new LotOfPrimitiveAndArrayAndString();
         int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
 

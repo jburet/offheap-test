@@ -1,7 +1,7 @@
 package jbu.testobject;
 
-public class LotOString {
-    private String a = "aazemlkfsdfùklgjsmkgdsfgertrieogjfdmknsdf;g,fsmdglkjerfesmfdkgndfsg;n:,dfgnds;:fvcxv dfkglmjerfuizoehfsdlfhskdljhfskdlfh";
+public class LotOfString {
+    public String a = "aazemlkfsdfùklgjsmkgdsfgertrieogjfdmknsdf;g,fsmdglkjerfesmfdkgndfsg;n:,dfgnds;:fvcxv dfkglmjerfuizoehfsdlfhskdljhfskdlfh";
     private String b = "aazemlkfsdfùklgjsmkgdsfgertrieogjfdmknsdf;g,fsmdglkjerfesmfdkgndfsg;n:,dfgnds;:fvcxv dfkglmjerfuizoehfsdlfhskdljhfskdlfh";
     private String c = "aazemlkfsdfùklgjsmkgdsfgertrieogjfdmknsdf;g,fsmdglkjerfesmfdkgndfsg;n:,dfgnds;:fvcxv dfkglmjerfuizoehfsdlfhskdljhfskdlfh";
     private String d = "aazemlkfsdfùklgjsmkgdsfgertrieogjfdmknsdf;g,fsmdglkjerfesmfdkgndfsg;n:,dfgnds;:fvcxv dfkglmjerfuizoehfsdlfhskdljhfskdlfh";
@@ -18,7 +18,7 @@ public class LotOString {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LotOString that = (LotOString) o;
+        LotOfString that = (LotOfString) o;
 
         if (a != null ? !a.equals(that.a) : that.a != null) return false;
         if (b != null ? !b.equals(that.b) : that.b != null) return false;

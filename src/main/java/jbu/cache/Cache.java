@@ -15,17 +15,11 @@ public class Cache<K, V> {
     private final Map<K, Long> keys;
 
     public Cache(String name, int approxSize) {
-        this.name = name;
-        this.allocator = new Allocator(approxSize);
-        this.pbs = new UnsafePrimitiveBeanSerializer();
-        this.keys = new HashMap<K, Long>();
+        this(name, new Allocator(approxSize));
     }
 
     public Cache(String name, Allocator allocator) {
-        this.name = name;
-        this.allocator = allocator;
-        this.pbs = new UnsafePrimitiveBeanSerializer();
-        this.keys = new HashMap<K, Long>();
+        this(name, allocator, new UnsafePrimitiveBeanSerializer());
     }
 
     public Cache(String name, Allocator allocator, Serializer serializer) {

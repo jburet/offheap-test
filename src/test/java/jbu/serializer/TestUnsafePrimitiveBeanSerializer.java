@@ -193,7 +193,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     public void test_ser_deser_simple_with_all_type_primitive_bean() {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
-        LotOfPrimitiveAndArray c = new LotOfPrimitiveAndArray();
+        LotOfPrimitiveAndArrayAndString c = new LotOfPrimitiveAndArrayAndString();
         System.out.println(pbs.estimateSerializedSize(c));
         long addr = a.alloc(2048);
         // Serialize
@@ -221,6 +221,32 @@ public class TestUnsafePrimitiveBeanSerializer {
         LotOfDoubleArray c = new LotOfDoubleArray();
         System.out.println(pbs.estimateSerializedSize(c));
         long addr = a.alloc(1024);
+        // Serialize
+        StoreContext sc = a.getStoreContext(addr);
+
+        //UnsafeReflection.debugArray(c.a);
+        pbs.serialize(c, sc);
+
+        // Deser
+        LoadContext lc = a.getLoadContext(addr);
+        Object res = pbs.deserialize(lc);
+
+        assertEquals(c, res);
+        //for(long i : res.a){
+        //    System.out.println(i);
+        //}
+        // estimated size
+        int serSize = pbs.estimateSerializedSize(c);
+    }
+
+    @Test
+    public void test_ser_deser_simple_string_bean() {
+        Allocator a = new Allocator(1 * 1024 * 1024);
+        Serializer pbs = new UnsafePrimitiveBeanSerializer();
+        LotOfString c = new LotOfString();
+        c.a = "test";
+        System.out.println(pbs.estimateSerializedSize(c));
+        long addr = a.alloc(4000);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
 

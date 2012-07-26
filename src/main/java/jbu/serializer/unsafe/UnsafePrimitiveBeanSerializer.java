@@ -5,6 +5,7 @@ import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
 import jbu.offheap.UnsafeUtil;
 import jbu.serializer.Serializer;
+import jbu.serializer.unsafe.type.StringSerializer;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Array;
@@ -21,19 +22,10 @@ public class UnsafePrimitiveBeanSerializer implements Serializer {
         // Serialize class reference
         sc.storeInt(cd.classReference);
         for (int i = 0; i < cd.nbFields; i++) {
-            if (cd.types[i].isArray) {
-                Object array = unsafe.getObject(obj, cd.offsets[i]);
-                int arrayContentLength = UnsafeReflection.getArraySizeContentInMem(array);
-                int arrayLength = UnsafeReflection.getArrayLength(array);
-                int arrayBaseOffset = UnsafeReflection.arrayBaseOffset(array);
-                // Store only length on 4 Bytes on after content length
-                sc.storeInt(arrayLength);
-                sc.storeSomething(array, arrayBaseOffset, arrayContentLength);
-            } else {
-                sc.storeSomething(obj, cd.offsets[i], cd.types[i].getLength());
-            }
+            cd.types[i].typeSerializer.serialize(obj, sc, cd, i);
         }
     }
+
 
     /**
      * Deserialize inside obj. Offset of loadcontext must be placed at the beginning of serialized object
@@ -54,28 +46,11 @@ public class UnsafePrimitiveBeanSerializer implements Serializer {
             e.printStackTrace();
         }
         for (int i = 0; i < cd.nbFields; i++) {
-            if (cd.types[i].isArray) {
-                // Retrieve length encoded in 4 bytes
-                int arrayLength = lc.loadInt();
-                // Instanciate a new array with length
-                // FIXME Verify cd.field[i].getType is an array
-                Object newArray = Array.newInstance(cd.fields[i].getType().getComponentType(), arrayLength);
-                // Replace content in heap from content serialized in offheap
-                Object heapArray = UnsafeReflection.getObject(cd.fields[i], res);
-                try {
-                    cd.fields[i].set(res, newArray);
-                } catch (IllegalAccessException e) {
-                    // FIXME manage this exception
-                    e.printStackTrace();
-                }
-                lc.loadArray(UnsafeReflection.getObject(cd.fields[i], res), UnsafeReflection.arrayBaseOffset(heapArray),
-                        UnsafeReflection.getArraySizeContentInMem(newArray));
-            } else {
-                lc.loadPrimitive(res, cd.offsets[i], cd.types[i].getLength());
-            }
+            cd.types[i].typeSerializer.deserialize(lc, cd, res, i);
         }
         return res;
     }
+
 
     @Override
     public int estimateSerializedSize(Object obj) {
@@ -97,8 +72,20 @@ public class UnsafePrimitiveBeanSerializer implements Serializer {
                 // add memory length stored in a int
                 size += 4;
 
-            } else {
+            } else if (cd.types[i].isPrimitive) {
                 size += cd.types[i].getLength();
+            } else {
+                if (cd.types[i].equals(Type.STRING)) {
+                    // get count and * 2
+                    Object string = unsafe.getObject(obj, cd.offsets[i]);
+                    try {
+
+                        size += UnsafeReflection.getInt(String.class.getDeclaredField("count"), string) * 2;
+                        size += 4;
+                    } catch (NoSuchFieldException e) {
+                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    }
+                }
             }
         }
         return size;
