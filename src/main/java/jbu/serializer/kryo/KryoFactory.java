@@ -2,16 +2,19 @@ package jbu.serializer.kryo;
 
 import com.esotericsoftware.kryo.Kryo;
 
-public class KryoFactory {
+final class KryoFactory {
 
-    private static final ThreadLocal<Kryo> kryos = new ThreadLocal<Kryo>();
+    private static final ThreadLocal<Kryo> KRYOS = new ThreadLocal<Kryo>();
 
-    public static Kryo getInstance() {
-        Kryo res = null;
-        if ((res = kryos.get()) == null) {
+    private KryoFactory() {
+    }
+
+    static Kryo getInstance() {
+        Kryo res = KRYOS.get();
+        if (res == null) {
             res = new Kryo();
             res.setAutoReset(true);
-            kryos.set(res);
+            KRYOS.set(res);
         }
         return res;
     }

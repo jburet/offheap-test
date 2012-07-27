@@ -1,9 +1,8 @@
 package jbu.serializer.unsafe.type;
 
+import jbu.exception.NotImplementedException;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
-import jbu.serializer.unsafe.ClassDesc;
-import jbu.serializer.unsafe.Type;
 
 public class PrimitiveSerializer extends TypeSerializer {
     @Override
@@ -24,6 +23,6 @@ public class PrimitiveSerializer extends TypeSerializer {
     @Override
     public Object deserialize(Type type, LoadContext lc) {
         // FIXME not implemented for primitive
-        throw new RuntimeException("Cannot directly deserialize primitive");
+        throw new NotImplementedException("Cannot directly deserialize primitive");
     }
 }

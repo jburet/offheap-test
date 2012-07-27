@@ -1,10 +1,9 @@
 package jbu.offheap;
-
-import sun.misc.Unsafe;
+import static jbu.Primitive.*;
+import static jbu.UnsafeUtil.unsafe;
 
 public class StoreContext {
 
-    private static final Unsafe unsafe = UnsafeUtil.unsafe;
     private long firstChunkAdr;
     private long currentBaseAdr;
     private int currentOffset;
@@ -24,17 +23,16 @@ public class StoreContext {
     public void storeInt(int value) {
         unsafe.putInt(this.currentBaseAdr + this.currentOffset, value);
         // FIXME 4 (int length) must be constant
-        this.currentOffset += 4;
-        this.remaining -= 4;
+        this.currentOffset += INT_LENGTH;
+        this.remaining -= INT_LENGTH;
     }
 
-    public void storeSomething(Object object, long offset, int byteRemaining) {
-        int copiedBytes = 0;
+    public void storeSomething(Object object, final long offset, final int length) {
+        int byteRemaining = length;
         do {
             int byteToCopy = (remaining > byteRemaining) ? byteRemaining : remaining;
+            unsafe.copyMemory(object, offset + (length - byteRemaining), null, this.currentBaseAdr + this.currentOffset, byteToCopy);
             byteRemaining -= byteToCopy;
-            unsafe.copyMemory(object, offset + copiedBytes, null, this.currentBaseAdr + this.currentOffset, byteToCopy);
-            copiedBytes += byteToCopy;
             this.currentOffset += byteToCopy;
             this.remaining -= byteToCopy;
             // If remaining in currentChunk == 0 load next chunk
@@ -58,6 +56,6 @@ public class StoreContext {
         // put the size of data in 4 first byte
         // FIXME with store context always use full size
         unsafe.putInt(this.currentBaseAdr + this.currentOffset, this.remaining);
-        this.currentOffset += 4;
+        this.currentOffset += INT_LENGTH;
     }
 }

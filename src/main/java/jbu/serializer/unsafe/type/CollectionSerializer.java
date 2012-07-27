@@ -2,9 +2,7 @@ package jbu.serializer.unsafe.type;
 
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
-import jbu.serializer.unsafe.ClassDesc;
-import jbu.serializer.unsafe.Type;
-import jbu.serializer.unsafe.UnsafeReflection;
+import jbu.UnsafeReflection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +50,17 @@ public class CollectionSerializer extends TypeSerializer<Collection> {
         }
 
         // get collection length
+        deserialize(lc, c);
+    }
+
+    @Override
+    public Collection deserialize(Type type, LoadContext lc) {
+        Collection c = instanciate(Collection.class);
+        deserialize(lc, c);
+        return c;
+    }
+
+    private void deserialize(LoadContext lc, Collection c) {
         int collectionLength = lc.loadInt();
         for (int i = 0; i < collectionLength; i++) {
             // load type
@@ -63,13 +72,8 @@ public class CollectionSerializer extends TypeSerializer<Collection> {
         }
     }
 
-    @Override
-    public Collection deserialize(Type type, LoadContext lc) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
     private Collection instanciate(Class<Collection> clazz) {
-        // TODO.. do best I can but perhaps a better solution exists
+        // TODO.. Perhaps a best solution exists
         // If class is concrete
         if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
             // try to instanciate

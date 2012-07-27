@@ -1,35 +1,38 @@
 package jbu.serializer.unsafe.type;
 
+import jbu.exception.InvalidJvmException;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
-import jbu.offheap.UnsafeUtil;
-import jbu.serializer.unsafe.ClassDesc;
-import jbu.serializer.unsafe.Type;
-import jbu.serializer.unsafe.UnsafeReflection;
+import jbu.UnsafeReflection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
+
+import static jbu.UnsafeUtil.unsafe;
 
 public class StringSerializer extends TypeSerializer<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StringSerializer.class);
-    private static Field OFFSET;
-    private static Field COUNT;
-    private static Field VALUE;
+    private static final Field OFFSET;
+    private static final Field COUNT;
+    private static final Field VALUE;
 
     static {
+        Field offset = null;
+        Field count = null;
+        Field value = null;
         try {
-            OFFSET = String.class.getDeclaredField("offset");
-            COUNT = String.class.getDeclaredField("count");
-            VALUE = String.class.getDeclaredField("value");
+            offset = String.class.getDeclaredField("offset");
+            count = String.class.getDeclaredField("count");
+            value = String.class.getDeclaredField("value");
         } catch (NoSuchFieldException e) {
-            // ?? not a standart JVM ?
-            // exit
-            LOGGER.error("Not a standard JVM ? Cannot find field in String");
-            System.exit(1);
+            // not a standart JVM
+            throw new InvalidJvmException("Not a standard JVM ? Cannot find field in String", e);
         }
+        OFFSET = offset;
+        COUNT = count;
+        VALUE = value;
 
     }
 
@@ -74,7 +77,7 @@ public class StringSerializer extends TypeSerializer<String> {
         lc.loadArray(internalArray, UnsafeReflection.arrayBaseOffset(internalArray),
                 UnsafeReflection.getArraySizeContentInMem(internalArray));
         // create a new string
-        String destString = new String();
+        String destString = "";
         // replace all his internal value
         UnsafeReflection.setInt(OFFSET, destString, 0);
         UnsafeReflection.setInt(COUNT, destString, stringLength);

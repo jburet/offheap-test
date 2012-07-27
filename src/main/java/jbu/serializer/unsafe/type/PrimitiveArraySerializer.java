@@ -1,10 +1,10 @@
 package jbu.serializer.unsafe.type;
 
+import static jbu.UnsafeUtil.unsafe;
+
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
-import jbu.serializer.unsafe.ClassDesc;
-import jbu.serializer.unsafe.Type;
-import jbu.serializer.unsafe.UnsafeReflection;
+import jbu.UnsafeReflection;
 
 import java.lang.reflect.Array;
 

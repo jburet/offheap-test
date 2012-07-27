@@ -1,5 +1,6 @@
 package jbu.offheap;
 
+import jbu.exception.BufferOverflowException;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;

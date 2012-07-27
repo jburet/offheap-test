@@ -1,11 +1,14 @@
 package jbu.offheap;
 
+import jbu.exception.InvalidParameterException;
+
+import static jbu.Primitive.*;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
-public abstract class Bins {
+abstract class Bins {
 
     protected static final int FREE = 0;
     protected static final int USED = 1;
@@ -45,18 +48,18 @@ public abstract class Bins {
         // In a chunk we also store chunck size in int. Adding 4 byte
         // And addr of next chunk. Adding 8 byte
         // FIXME can be optimised. Using less bytes if chunksize < 256 or < 65000
-        this.finalChunkSize = chunkSize + 4 + 8;
+        this.finalChunkSize = chunkSize + INT_LENGTH + LONG_LENGTH;
         this.chunks = new AtomicIntegerArray(initialChunkNumber);
     }
 
     long allocateOneChunk() {
         // Check if they are some chunk free
         if (occupation.get() < size) {
-            int chunkOffset = this.chunkOffset.get();
+            int currentChunkOffset = this.chunkOffset.get();
             for (int i = 0; i < this.size; i++) {
-                int currentChunkIndex = (i + chunkOffset) % this.size;
+                int currentChunkIndex = (i + currentChunkOffset) % this.size;
                 if (chunks.compareAndSet(currentChunkIndex, FREE, USED)) {
-                    this.chunkOffset.set(chunkOffset + i +1);
+                    this.chunkOffset.set(currentChunkOffset + i + 1);
                     occupation.incrementAndGet();
                     return AddrAlign.constructAddr(baseAddr, currentChunkIndex);
                 }
@@ -74,9 +77,9 @@ public abstract class Bins {
         long[] res = new long[n];
         int nbChunckAllocated = 0;
         // Search for n free chunk
-        int chunkOffset = this.chunkOffset.get();
+        int currentChunkOffet = this.chunkOffset.get();
         for (int i = 0; i < this.size; i++) {
-            int currentChunkIndex = (i + chunkOffset) % this.size;
+            int currentChunkIndex = (i + currentChunkOffet) % this.size;
             if (chunks.compareAndSet(currentChunkIndex, FREE, USED)) {
                 res[nbChunckAllocated] = AddrAlign.constructAddr(baseAddr, currentChunkIndex);
             } else {
@@ -101,7 +104,7 @@ public abstract class Bins {
      *
      * @param chunks
      */
-    public void freeChunk(long... chunks) {
+    void freeChunk(long... chunks) {
         for (long chunkAdr : chunks) {
             this.chunks.set(AddrAlign.getChunkId(chunkAdr), FREE);
             occupation.decrementAndGet();

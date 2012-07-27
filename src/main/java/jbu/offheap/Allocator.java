@@ -1,12 +1,12 @@
 package jbu.offheap;
 
-import sun.misc.Unsafe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.*;
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -16,36 +16,37 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Allocator implements AllocatorMBean {
 
-    private static Unsafe unsafe = UnsafeUtil.unsafe;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Allocator.class);
+
+    private static final int DEFAULT_MIN_CHUNK_SIZE = 256;
+    private static final double MIN_FILL_FACTOR = 0.75d;
 
     //Thread safe until cannot be modified at runtime
     private final Map<Integer, Bins> binsByAddr = new HashMap<Integer, Bins>();
     //Thread safe until cannot be modified at runtime
-    private final TreeMap<Integer, Bins> binsBySize = new TreeMap<Integer, Bins>();
+    private final NavigableMap<Integer, Bins> binsBySize = new TreeMap<Integer, Bins>();
 
     private final AtomicInteger allocatedMemory = new AtomicInteger(0);
     private final AtomicInteger usedMemory = new AtomicInteger(0);
     private final AtomicLong nbAllocation = new AtomicLong(0);
     private final AtomicLong nbFree = new AtomicLong(0);
 
-
     public Allocator(int maxMemory) {
-        constructWithLogScale(maxMemory, 1, true);
+        this(maxMemory, DEFAULT_MIN_CHUNK_SIZE);
     }
 
-    private void constructWithLogScale(int initialMemory, int maxBins, boolean unsafe) {
+    public Allocator(int maxMemory, int firstChunkSize) {
+        constructWithLinearScale(maxMemory, 1, firstChunkSize);
+    }
+
+    private void constructWithLinearScale(int initialMemory, int maxBins, int firstChunkSize) {
         // Construct scale
 
         int binsSize = initialMemory / maxBins;
-        int currentChunkSize = 1024;
+        int currentChunkSize = firstChunkSize;
 
         for (int i = 0; i < maxBins; i++) {
-            Bins bbb;
-            if (unsafe) {
-                bbb = new UnsafeBins((int) Math.ceil((double) binsSize / (double) currentChunkSize), currentChunkSize, i);
-            } else {
-                bbb = new ByteBufferBins(binsSize / currentChunkSize, currentChunkSize, i);
-            }
+            Bins bbb = new UnsafeBins((int) Math.ceil((double) binsSize / (double) currentChunkSize), currentChunkSize, i);
             binsBySize.put(currentChunkSize, bbb);
             binsByAddr.put(i, bbb);
             currentChunkSize = currentChunkSize * 2;
@@ -66,7 +67,7 @@ public class Allocator implements AllocatorMBean {
             Map.Entry<Integer, Bins> lesserBin = binsBySize.floorEntry(memoryToAllocate);
             Map.Entry<Integer, Bins> upperBin = binsBySize.ceilingEntry(memoryToAllocate);
             // Fill factor determine when stop cutting in two memory to allocate
-            if (lesserBin == null || (((double) memorySize / (double) lesserBin.getKey()) > 0.75d && upperBin != null)) {
+            if (lesserBin == null || (((double) memorySize / (double) lesserBin.getKey()) > MIN_FILL_FACTOR && upperBin != null)) {
                 // take upper
                 usedBin = upperBin;
             } else {
@@ -137,67 +138,12 @@ public class Allocator implements AllocatorMBean {
         } while (nextAdr != -1);
     }
 
-
-    public void store(long firstChunkAdr, byte[] data) {
-        // store in first chunk all data that's I can store
-        long currentChunkAdr = firstChunkAdr;
-        int currentOffset = 0;
-        while (currentOffset < data.length) {
-            int currentChunkId = AddrAlign.getChunkId(currentChunkAdr);
-            // Check if currentChunkId = -1 Error
-            if (currentChunkAdr == -1) {
-                throw new BufferOverflowException("Data is too large");
-            }
-            Bins bin = getBinFromAddr(currentChunkAdr);
-            int chunkSize = bin.chunkSize;
-            bin.storeInChunk(currentChunkId, data, currentOffset,
-                    (data.length - currentOffset > chunkSize) ? chunkSize : data.length - currentOffset);
-            currentOffset += chunkSize;
-            currentChunkAdr = bin.getNextChunkId(currentChunkId);
-        }
-    }
-
-    public void store(long firstChunkAdr, ByteBuffer data) {
-        // store in first chunk all data that's I can store
-        // The byte buffer must be ready for reading...
-        // Store only from position to limit
-        long currentChunkAdr = firstChunkAdr;
-        while (data.remaining() > 0) {
-            int currentChunkId = AddrAlign.getChunkId(currentChunkAdr);
-            // Check if currentChunkId = -1 Error
-            if (currentChunkAdr == -1) {
-                throw new BufferOverflowException("Data is too large");
-            }
-            Bins bin = getBinFromAddr(currentChunkAdr);
-            int chunkSize = bin.chunkSize;
-            bin.storeInChunk(currentChunkId, data);
-            currentChunkAdr = bin.getNextChunkId(currentChunkId);
-        }
-    }
-
     public StoreContext getStoreContext(long firstChunkAdr) {
-        // FIXME remove size if not used
         return new StoreContext(this, firstChunkAdr);
     }
 
     public LoadContext getLoadContext(long firstChunkAdr) {
         return new LoadContext(this, firstChunkAdr);
-    }
-
-    public byte[] load(long firstChunkAdr) {
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        byte[] tmpB;
-        long currentChunkAdr = firstChunkAdr;
-        // Get data of current chunk
-        while (currentChunkAdr != -1) {
-            int currentChunkId = AddrAlign.getChunkId(currentChunkAdr);
-            Bins bin = getBinFromAddr(currentChunkAdr);
-            tmpB = bin.loadFromChunk(currentChunkId);
-            bout.write(tmpB, 0, tmpB.length);
-            // get next chunk
-            currentChunkAdr = bin.getNextChunkId(currentChunkId);
-        }
-        return bout.toByteArray();
     }
 
     private void setNextChunk(long currentChunkAdr, long nextChunkAddr) {
@@ -210,24 +156,16 @@ public class Allocator implements AllocatorMBean {
         return binsByAddr.get(AddrAlign.getBinId(chunkAddr));
     }
 
+    // JMX
+
     public void registerInMBeanServer(MBeanServer mbs) {
         try {
             mbs.registerMBean(this, new ObjectName("Allocator:name=allocator"));
             for (Bins bbb : binsBySize.values()) {
-                if (bbb instanceof ByteBufferBins) {
-                    mbs.registerMBean(bbb, new ObjectName("Allocator.ByteBufferBins:maxChunk=" + bbb.chunkSize));
-                } else if (bbb instanceof UnsafeBins) {
-                    mbs.registerMBean(bbb, new ObjectName("Allocator.UnsafeBins:maxChunk=" + bbb.chunkSize));
-                }
+                mbs.registerMBean(bbb, new ObjectName("Allocator.UnsafeBins:maxChunk=" + bbb.chunkSize));
             }
-        } catch (InstanceAlreadyExistsException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (MBeanRegistrationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (NotCompliantMBeanException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (MalformedObjectNameException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException | MalformedObjectNameException e) {
+            LOGGER.warn("Cannot register JMX Beans", e);
         }
 
     }
@@ -235,12 +173,8 @@ public class Allocator implements AllocatorMBean {
     public void unRegisterInMBeanServer(MBeanServer mbs) {
         try {
             mbs.unregisterMBean(new ObjectName("Allocator:name=allocator"));
-        } catch (InstanceNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (MBeanRegistrationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (MalformedObjectNameException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        } catch (InstanceNotFoundException | MBeanRegistrationException | MalformedObjectNameException e) {
+            LOGGER.warn("Cannot unregister JMX Beans", e);
         }
     }
 

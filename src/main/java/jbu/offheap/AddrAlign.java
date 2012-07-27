@@ -1,17 +1,20 @@
 package jbu.offheap;
 
-public class AddrAlign {
+final class AddrAlign {
 
-    public static long constructAddr(int binId, int chunkId) {
-        return ((long) binId << 32L) | ((long)chunkId & 0xffffffffL);
+    private AddrAlign() {
     }
 
-    public static int getChunkId(long chunkAdr) {
+    static long constructAddr(int binId, int chunkId) {
+        return ((long) binId << 32L) | ((long) chunkId & 0xffffffffL);
+    }
+
+    static int getChunkId(long chunkAdr) {
         // masking is implicit
         return (int) (chunkAdr & 0xffffffffL);
     }
 
-    public static int getBinId(long chunkAdr) {
+    static int getBinId(long chunkAdr) {
         return (int) (chunkAdr >> 32L);
     }
 }

@@ -1,6 +1,6 @@
 package jbu.serializer;
 
-import jbu.serializer.unsafe.UnsafeReflection;
+import jbu.UnsafeReflection;
 import org.junit.Test;
 
 import java.lang.reflect.Field;

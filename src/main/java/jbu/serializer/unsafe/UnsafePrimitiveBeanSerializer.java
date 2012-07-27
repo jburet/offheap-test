@@ -1,18 +1,18 @@
 package jbu.serializer.unsafe;
 
+import static jbu.UnsafeUtil.unsafe;
+import static jbu.Primitive.*;
 
+import jbu.UnsafeReflection;
+import jbu.exception.CannotDeserializeException;
+import jbu.exception.InvalidJvmException;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
-import jbu.offheap.UnsafeUtil;
 import jbu.serializer.Serializer;
-import jbu.serializer.unsafe.type.StringSerializer;
-import sun.misc.Unsafe;
-
-import java.lang.reflect.Array;
+import jbu.serializer.unsafe.type.ClassDesc;
+import jbu.serializer.unsafe.type.Type;
 
 public class UnsafePrimitiveBeanSerializer implements Serializer {
-
-    private static final Unsafe unsafe = UnsafeUtil.unsafe;
 
     @Override
     public void serialize(Object obj, StoreContext sc) {
@@ -33,17 +33,14 @@ public class UnsafePrimitiveBeanSerializer implements Serializer {
      * @param lc
      */
     @Override
-    public Object deserialize(LoadContext lc) {
+    public Object deserialize(LoadContext lc) throws CannotDeserializeException {
         ClassDesc cd = ClassDesc.resolveByRef(lc.loadInt());
         Object res = null;
         // constructor without arg must exist...
         try {
             res = cd.clazz.newInstance();
-            // FIXME How manage this exception ?
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new CannotDeserializeException("No public default constructor for class " + cd.clazz, e);
         }
         for (int i = 0; i < cd.nbFields; i++) {
             cd.types[i].typeSerializer.deserialize(lc, cd, res, i);
@@ -59,7 +56,7 @@ public class UnsafePrimitiveBeanSerializer implements Serializer {
         int size = 0;
 
         // Add class reference
-        size += 8;
+        size += LONG_LENGTH;
 
         // Add size for each field
         for (int i = 0; i < cd.nbFields; i++) {
@@ -70,7 +67,7 @@ public class UnsafePrimitiveBeanSerializer implements Serializer {
                 int arrayLength = UnsafeReflection.getArraySizeContentInMem(array);
                 size += arrayLength;
                 // add memory length stored in a int
-                size += 4;
+                size += INT_LENGTH;
 
             } else if (cd.types[i].isPrimitive) {
                 size += cd.types[i].getLength();
@@ -79,11 +76,10 @@ public class UnsafePrimitiveBeanSerializer implements Serializer {
                     // get count and * 2
                     Object string = unsafe.getObject(obj, cd.offsets[i]);
                     try {
-
-                        size += UnsafeReflection.getInt(String.class.getDeclaredField("count"), string) * 2;
-                        size += 4;
+                        size += UnsafeReflection.getInt(String.class.getDeclaredField("count"), string) * CHAR_LENGTH;
+                        size += INT_LENGTH;
                     } catch (NoSuchFieldException e) {
-                        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                        throw new InvalidJvmException("String class not as exception", e);
                     }
                 }
             }

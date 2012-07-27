@@ -1,4 +1,4 @@
-package jbu.offheap;
+package jbu.exception;
 
 public class InvalidParameterException extends RuntimeException {
 

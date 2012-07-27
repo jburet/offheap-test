@@ -6,7 +6,7 @@ import com.esotericsoftware.kryo.io.Output;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
 import jbu.serializer.Serializer;
-import jbu.serializer.unsafe.UnsafeReflection;
+import jbu.UnsafeReflection;
 
 public class KryoSerializer implements Serializer {
 
@@ -27,8 +27,7 @@ public class KryoSerializer implements Serializer {
         lc.loadArray(ser, UnsafeReflection.arrayBaseOffset(ser), UnsafeReflection.getArraySizeContentInMem(ser));
         Kryo kryo = KryoFactory.getInstance();
         Input in = new Input(ser);
-        Object res = kryo.readClassAndObject(in);
-        return res;
+        return kryo.readClassAndObject(in);
     }
 
     @Override

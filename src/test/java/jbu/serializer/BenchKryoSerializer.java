@@ -1,5 +1,6 @@
 package jbu.serializer;
 
+import jbu.exception.CannotDeserializeException;
 import jbu.offheap.Allocator;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
@@ -23,7 +24,11 @@ public class BenchKryoSerializer {
         long start = System.nanoTime();
         for (int i = 0; i < NB_MSG_WRITE; i++) {
             pbs.serialize(c, sc);
-            res = (LotOfPrimitiveAndArrayAndString) pbs.deserialize(lc);
+            try {
+                res = (LotOfPrimitiveAndArrayAndString) pbs.deserialize(lc);
+            } catch (CannotDeserializeException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
             sc.reuse();
             lc.reset();
         }

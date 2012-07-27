@@ -1,5 +1,6 @@
 package jbu.serializer;
 
+import jbu.exception.CannotDeserializeException;
 import jbu.offheap.Allocator;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
@@ -34,7 +35,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void bench_deser_simple_int_bean() {
+    public void bench_deser_simple_int_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(9 * 4);
@@ -50,7 +51,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         long start = System.nanoTime();
         int NB_MSG_READ = 10000000;
         for (int i = 0; i < NB_MSG_READ; i++) {
-            pbs.deserialize( lc);
+            pbs.deserialize(lc);
             // Free load context
             lc.reset();
         }
@@ -88,7 +89,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void bench_deser_simple_bean() {
+    public void bench_deser_simple_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
@@ -106,7 +107,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         long start = System.nanoTime();
         int NB_MSG_READ = 1000000;
         for (int i = 0; i < NB_MSG_READ; i++) {
-            pbs.deserialize( lc);
+            pbs.deserialize(lc);
             // Free load context
             lc.reset();
         }
@@ -119,7 +120,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void bench_alloc_ser_deser_simple_bean() {
+    public void bench_alloc_ser_deser_simple_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(500 * 1024 * 1024);
         int NB_MSG_WRITE = 1000000;
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
@@ -133,7 +134,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
             pbs.serialize(c, sc);
             LotOfPrimitive res = new LotOfPrimitive();
             LoadContext lc = a.getLoadContext(addr);
-            pbs.deserialize( lc);
+            pbs.deserialize(lc);
         }
         long time = System.nanoTime() - start;
         System.out.println("Write End in " + time / 1000 / 1000 + " ms");
@@ -144,7 +145,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void bench_alloc_ser_deser_simple_bean_inf() {
+    public void bench_alloc_ser_deser_simple_bean_inf() throws CannotDeserializeException {
         Allocator a = new Allocator(500 * 1024 * 1024);
         int NB_MSG_WRITE = 1000000;
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
@@ -157,7 +158,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         LoadContext lc = a.getLoadContext(addr);
         while (true) {
             pbs.serialize(c, sc);
-            pbs.deserialize( lc);
+            pbs.deserialize(lc);
             sc.reuse();
             lc.reset();
         }
@@ -165,7 +166,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void bench_alloc_ser_deser_simple_bean_witharray() {
+    public void bench_alloc_ser_deser_simple_bean_witharray() throws CannotDeserializeException {
         Allocator a = new Allocator(500 * 1024 * 1024);
         int NB_MSG_WRITE = 1000000;
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
@@ -178,7 +179,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         long start = System.nanoTime();
         for (int i = 0; i < NB_MSG_WRITE; i++) {
             pbs.serialize(c, sc);
-            pbs.deserialize( lc);
+            pbs.deserialize(lc);
             sc.reuse();
             lc.reset();
         }

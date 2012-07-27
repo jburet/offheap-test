@@ -29,10 +29,11 @@ public class BenchAllocator {
         List<Long> chunks = new ArrayList<Long>();
 
         Allocator a = new Allocator(10 * 1024 * 1024);
+        OffheapMemoryAccess oma = new OffheapMemoryAccess(a);
         for (int i = 0; i < 100000; i++) {
             long start = System.nanoTime();
             long firstChunk = a.alloc(100);
-            a.store(firstChunk, data);
+            oma.store(firstChunk, data);
             totalTime += (System.nanoTime() - start);
             nbExecution++;
             chunks.add(firstChunk);
@@ -102,6 +103,7 @@ public class BenchAllocator {
 
         // Use a 100 MB cache
         Allocator a = new Allocator(400 * 1024 * 1024);
+        OffheapMemoryAccess oma = new OffheapMemoryAccess(a);
         a.registerInMBeanServer(mbs);
 
         // the bench
@@ -116,7 +118,7 @@ public class BenchAllocator {
                 totals[rand] += System.nanoTime() - start;
                 nbAllocs[rand]++;
                 start = System.nanoTime();
-                a.store(ref, data);
+                oma.store(ref, data);
                 totalWriteTime = +System.nanoTime() - start;
                 nbWrite++;
 
@@ -141,7 +143,7 @@ public class BenchAllocator {
                     totals[rand] += System.nanoTime() - start;
                     nbAllocs[rand]++;
                     start = System.nanoTime();
-                    a.store(ref, data);
+                    oma.store(ref, data);
                     totalWriteTime = +System.nanoTime() - start;
                     nbWrite++;
                 } else {
@@ -253,6 +255,7 @@ public class BenchAllocator {
 
         // Use a 100 MB cache
         Allocator a;
+        OffheapMemoryAccess oma = new OffheapMemoryAccess(a);
 
         AllocRunnable(Allocator a) {
             this.a = a;
@@ -273,7 +276,7 @@ public class BenchAllocator {
                     long ref = alloc(a, refs, data);
                     totals[rand] += System.nanoTime() - start;
                     nbAllocs[rand]++;
-                    a.store(ref, data);
+                    oma.store(ref, data);
 
                 }
                 // If more than 2000 ref free
@@ -296,7 +299,7 @@ public class BenchAllocator {
                         long ref = alloc(a, refs, data);
                         totals[rand] += System.nanoTime() - start;
                         nbAllocs[rand]++;
-                        a.store(ref, data);
+                        oma.store(ref, data);
                     } else {
                         int ref = r.nextInt(refs.size());
                         long start = System.nanoTime();

@@ -1,13 +1,18 @@
 package jbu.cache;
 
+import jbu.exception.CannotDeserializeException;
 import jbu.offheap.Allocator;
 import jbu.serializer.Serializer;
 import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class Cache<K, V> {
+public class Cache<K, V> implements CacheMBean {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Cache.class);
 
     private final String name;
     private final Allocator allocator;
@@ -37,9 +42,12 @@ public class Cache<K, V> {
      * @param key
      * @param value
      * @return adresse where value is stored
-     * @throws NullPointerException If value is null
+     * @throws IllegalArgumentException If value is null
      */
-    public long put(K key, V value) throws NullPointerException {
+    public long put(K key, V value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Value should not be null");
+        }
         long addr = allocator.alloc(pbs.estimateSerializedSize(value));
         pbs.serialize(value, allocator.getStoreContext(addr));
         keys.put(key, addr);
@@ -47,7 +55,12 @@ public class Cache<K, V> {
     }
 
     public V get(K key) {
-        return (V) pbs.deserialize(allocator.getLoadContext(keys.get(key)));
+        try {
+            return (V) pbs.deserialize(allocator.getLoadContext(keys.get(key)));
+        } catch (CannotDeserializeException e) {
+            LOGGER.error("Cannot deserialize value", e);
+            return null;
+        }
     }
 
     public boolean remove(K key) {
@@ -62,7 +75,12 @@ public class Cache<K, V> {
     public V getAndRemove(K key) {
         Long addr = keys.remove(key);
         if (addr != null) {
-            V res = (V) pbs.deserialize(allocator.getLoadContext(addr));
+            V res = null;
+            try {
+                res = (V) pbs.deserialize(allocator.getLoadContext(addr));
+            } catch (CannotDeserializeException e) {
+                LOGGER.error("Cannot deserialize value", e);
+            }
             allocator.free(addr);
             return res;
         }
@@ -76,5 +94,13 @@ public class Cache<K, V> {
         for (Long add : keys.values()) {
             allocator.free(add);
         }
+    }
+
+
+    // JMX Accessor
+
+    @Override
+    public String getName() {
+        return name;
     }
 }

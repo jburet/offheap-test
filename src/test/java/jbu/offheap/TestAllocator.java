@@ -1,5 +1,6 @@
 package jbu.offheap;
 
+import jbu.UnsafeUtil;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -16,9 +17,10 @@ public class TestAllocator {
             data[i] = (byte) i;
         }
         Allocator allocator = new Allocator(10 * 1024 * 1024);
+        OffheapMemoryAccess oma = new OffheapMemoryAccess(allocator);
         long firstChunk = allocator.alloc(10);
-        allocator.store(firstChunk, data);
-        byte[] dataRes = allocator.load(firstChunk);
+        oma.store(firstChunk, data);
+        byte[] dataRes = oma.load(firstChunk);
         assertTrue(Arrays.equals(data, dataRes));
     }
 
@@ -29,9 +31,10 @@ public class TestAllocator {
             data[i] = (byte) i;
         }
         Allocator allocator = new Allocator(10 * 1024 * 1024);
+        OffheapMemoryAccess oma = new OffheapMemoryAccess(allocator);
         long firstChunk = allocator.alloc(68);
-        allocator.store(firstChunk, data);
-        byte[] dataRes = allocator.load(firstChunk);
+        oma.store(firstChunk, data);
+        byte[] dataRes = oma.load(firstChunk);
         assertTrue(Arrays.equals(data, dataRes));
     }
 
@@ -42,9 +45,10 @@ public class TestAllocator {
             data[i] = (byte) i;
         }
         Allocator allocator = new Allocator(10 * 1024 * 1024);
+        OffheapMemoryAccess oma = new OffheapMemoryAccess(allocator);
         long firstChunk = allocator.alloc(123456);
-        allocator.store(firstChunk, data);
-        byte[] dataRes = allocator.load(firstChunk);
+        oma.store(firstChunk, data);
+        byte[] dataRes = oma.load(firstChunk);
         assertTrue(Arrays.equals(data, dataRes));
     }
 
@@ -58,9 +62,10 @@ public class TestAllocator {
         bb.put(data);
         bb.flip();
         Allocator allocator = new Allocator(10 * 1024 * 1024);
+        OffheapMemoryAccess oma = new OffheapMemoryAccess(allocator);
         long firstChunk = allocator.alloc(123456);
-        allocator.store(firstChunk, bb);
-        byte[] dataRes = allocator.load(firstChunk);
+        oma.store(firstChunk, bb);
+        byte[] dataRes = oma.load(firstChunk);
         assertTrue(Arrays.equals(data, dataRes));
     }
 
@@ -68,6 +73,7 @@ public class TestAllocator {
     public void test_unsafe_store_int() {
         int a = 42;
         Allocator allocator = new Allocator(1 * 1024);
+        OffheapMemoryAccess oma = new OffheapMemoryAccess(allocator);
         long firstChunk = allocator.alloc(4);
         StoreContext sc = allocator.getStoreContext(firstChunk);
         sc.storeInt(a);

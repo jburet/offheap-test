@@ -1,5 +1,6 @@
 package jbu.serializer;
 
+import jbu.exception.CannotDeserializeException;
 import jbu.offheap.Allocator;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
@@ -16,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class TestUnsafePrimitiveBeanSerializer {
 
     @Test
-    public void test_ser_deser_simple_int_bean() {
+    public void test_ser_deser_simple_int_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(9 * 4);
@@ -32,7 +33,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_bean() {
+    public void test_ser_deser_simple_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
@@ -50,7 +51,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_boolean_bean() {
+    public void test_ser_deser_simple_boolean_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfBoolean c = new LotOfBoolean(true);
@@ -68,7 +69,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_char_bean() {
+    public void test_ser_deser_simple_char_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfChar c = new LotOfChar('a');
@@ -86,7 +87,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_few_double_bean() {
+    public void test_ser_deser_simple_few_double_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         SomeDouble c = new SomeDouble(1);
@@ -104,7 +105,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_double_bean() {
+    public void test_ser_deser_simple_double_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfDouble c = new LotOfDouble(1);
@@ -122,7 +123,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_array_int_primitive_bean() {
+    public void test_ser_deser_simple_array_int_primitive_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(64);
@@ -144,7 +145,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_array_boolean_primitive_bean() {
+    public void test_ser_deser_simple_array_boolean_primitive_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         long addr = a.alloc(64);
@@ -166,7 +167,7 @@ public class TestUnsafePrimitiveBeanSerializer {
 
 
     @Test
-    public void test_ser_deser_simple_array_long_primitive_bean() {
+    public void test_ser_deser_simple_array_long_primitive_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         ArrayLongPrimitive c = new ArrayLongPrimitive(new long[]{1, 2, 5, 10, 20});
@@ -191,7 +192,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_with_all_type_primitive_bean() {
+    public void test_ser_deser_simple_with_all_type_primitive_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitiveAndArrayAndString c = new LotOfPrimitiveAndArrayAndString();
@@ -216,7 +217,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_double_array_bean() {
+    public void test_ser_deser_simple_double_array_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfDoubleArray c = new LotOfDoubleArray();
@@ -241,7 +242,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_string_bean() {
+    public void test_ser_deser_simple_string_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfString c = new LotOfString();
@@ -267,7 +268,7 @@ public class TestUnsafePrimitiveBeanSerializer {
     }
 
     @Test
-    public void test_ser_deser_simple_arraylist_bean() {
+    public void test_ser_deser_simple_arraylist_bean() throws CannotDeserializeException {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         ObjectWithArrayList c = new ObjectWithArrayList();

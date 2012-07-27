@@ -1,17 +1,17 @@
-package jbu.serializer.unsafe;
+package jbu.serializer.unsafe.type;
 
-import jbu.offheap.UnsafeUtil;
+import static jbu.UnsafeUtil.unsafe;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ClassDesc {
+public final class ClassDesc {
 
-    private final static AtomicInteger classCounter = new AtomicInteger(0);
-    private final static Map<Class, ClassDesc> classDescRefs = new HashMap<Class, ClassDesc>();
-    private final static Map<Integer, ClassDesc> classDescRefsByInt = new HashMap<Integer, ClassDesc>();
+    private static final AtomicInteger classCounter = new AtomicInteger(0);
+    private static final Map<Class, ClassDesc> classDescRefs = new HashMap<Class, ClassDesc>();
+    private static final Map<Integer, ClassDesc> classDescRefsByInt = new HashMap<Integer, ClassDesc>();
 
     public final Type[] types;
     public final long[] offsets;
@@ -33,11 +33,11 @@ public class ClassDesc {
         return classDescRefsByInt.get(ref);
     }
 
-    private ClassDesc(Type[] types, long[] offsets, Field[] fields, Class<?> clazz) {
+    private ClassDesc(final Type[] types, final long[] offsets, final Field[] fields, final Class<?> clazz) {
         // Verify same length
         if (types.length != offsets.length) {
             // FIXME caracterize exception
-            throw new RuntimeException("Error in offsets or types. Length are different");
+            throw new IllegalArgumentException("Error in offsets or types. Length are different");
         }
         this.nbFields = types.length;
         this.types = types;
@@ -54,7 +54,7 @@ public class ClassDesc {
         for (int i = 0; i < fields.length; i++) {
             Field f = fields[i];
             f.setAccessible(true);
-            offsets[i] = UnsafeUtil.unsafe.objectFieldOffset(f);
+            offsets[i] = unsafe.objectFieldOffset(f);
             types[i] = Type.resolveType(f);
         }
         ClassDesc cd = new ClassDesc(types, offsets, fields, c);

@@ -50,6 +50,23 @@ public class LotOfString {
         result = 31 * result + (l != null ? l.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "LotOfString{" +
+                "a='" + a + '\'' +
+                ", b='" + b + '\'' +
+                ", c='" + c + '\'' +
+                ", d='" + d + '\'' +
+                ", e='" + e + '\'' +
+                ", f='" + f + '\'' +
+                ", h='" + h + '\'' +
+                ", i='" + i + '\'' +
+                ", j='" + j + '\'' +
+                ", k='" + k + '\'' +
+                ", l='" + l + '\'' +
+                '}';
+    }
 }
 
 
