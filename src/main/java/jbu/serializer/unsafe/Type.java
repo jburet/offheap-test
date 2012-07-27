@@ -75,8 +75,21 @@ abstract class Type<T> {
 
         @Override
         int serializedSize(Collection obj) {
-            // FIXME
-            return 0;
+            // FIXME test with a first bad implementation
+            int size = 0;
+            // collection type
+            size += INT_LENGTH;
+
+            for (Object elt : obj) {
+                // element type
+                size += INT_LENGTH;
+                if (elt instanceof String) {
+                    // String size
+                    size += INT_LENGTH;
+                    size += ((String) elt).length() * CHAR_LENGTH;
+                }
+            }
+            return size;
         }
     };
 

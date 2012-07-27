@@ -98,7 +98,6 @@ public class Cache<K, V> implements CacheMBean {
 
 
     // JMX Accessor
-
     @Override
     public String getName() {
         return name;

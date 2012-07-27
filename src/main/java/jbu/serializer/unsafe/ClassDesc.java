@@ -1,9 +1,13 @@
 package jbu.serializer.unsafe;
 
+import com.google.common.collect.Collections2;
 import jbu.UnsafeReflection;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -48,16 +52,25 @@ final class ClassDesc {
     }
 
     private static ClassDesc registerClass(Class c) {
-        Field[] fields = c.getDeclaredFields();
-        long[] offsets = new long[fields.length];
-        Type[] types = new Type[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            Field f = fields[i];
-            f.setAccessible(true);
-            offsets[i] = UnsafeReflection.getOffset(f);
-            types[i] = Type.resolveType(f);
+        Field[] allFields = c.getDeclaredFields();
+        List<Field> fields = new ArrayList<>();
+        List<Long> offsetList = new ArrayList<>();
+        List<Type> types = new ArrayList<>();
+        for (int i = 0; i < allFields.length; i++) {
+            Field f = allFields[i];
+            if (!Modifier.isStatic(f.getModifiers())) {
+                f.setAccessible(true);
+                offsetList.add(UnsafeReflection.getOffset(f));
+                types.add(Type.resolveType(f));
+                fields.add(f);
+            }
         }
-        ClassDesc cd = new ClassDesc(types, offsets, fields, c);
+        long[] offsets = new long[offsetList.size()];
+        for (int i = 0; i < offsetList.size(); i++) {
+            offsets[i] = offsetList.get(i);
+        }
+        ClassDesc cd = new ClassDesc(types.toArray(new Type[types.size()]), offsets,
+                fields.toArray(new Field[fields.size()]), c);
         classDescRefs.put(c, cd);
         classDescRefsByInt.put(cd.classReference, cd);
         return classDescRefs.get(c);

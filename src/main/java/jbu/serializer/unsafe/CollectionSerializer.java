@@ -27,6 +27,10 @@ class CollectionSerializer extends TypeSerializer<Collection> {
     void serialize(Collection collection, Type type, StoreContext sc) {
         // FIXME Element cannot be null
         // FIXME If something is not serializable put the reference (long) instead
+        // register collection implementation
+        ClassDesc cd = ClassDesc.resolveByClass(collection.getClass());
+        // Store class reference
+        sc.storeInt(cd.classReference);
         int collectionLength = collection.size();
         // FIXME hope collection don't change during serialization
         // Store collection length on 4 bytes
@@ -41,11 +45,13 @@ class CollectionSerializer extends TypeSerializer<Collection> {
 
     @Override
     void deserialize(LoadContext lc, ClassDesc cd, Object dest, int fieldIndex) {
+        // Get concrete class of collection
+        ClassDesc cs = ClassDesc.resolveByRef(lc.loadInt());
         Collection c = (Collection) UnsafeReflection.getObject(cd.fields[fieldIndex], dest);
         // If c don't exist... create them... By default use ArrayList
         if (c == null) {
-            // find a implementation for c
-            c = instanciate((Class<Collection>) cd.fields[fieldIndex].getType());
+            // instanciate it
+            c = instanciate((Class<Collection>) cs.clazz);
             UnsafeReflection.setObject(cd.fields[fieldIndex], dest, c);
         }
 
@@ -55,7 +61,8 @@ class CollectionSerializer extends TypeSerializer<Collection> {
 
     @Override
     Collection deserialize(Type type, LoadContext lc) {
-        Collection c = instanciate(Collection.class);
+        ClassDesc cs = ClassDesc.resolveByRef(lc.loadInt());
+        Collection c = instanciate((Class<Collection>) cs.clazz);
         deserialize(lc, c);
         return c;
     }

@@ -1,11 +1,9 @@
 package jbu.serializer.unsafe;
 
-import static jbu.UnsafeUtil.unsafe;
 import static jbu.Primitive.*;
 
 import jbu.UnsafeReflection;
 import jbu.exception.CannotDeserializeException;
-import jbu.exception.InvalidJvmException;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
 import jbu.serializer.Serializer;
