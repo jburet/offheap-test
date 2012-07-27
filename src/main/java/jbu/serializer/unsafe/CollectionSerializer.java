@@ -1,4 +1,4 @@
-package jbu.serializer.unsafe.type;
+package jbu.serializer.unsafe;
 
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
@@ -13,18 +13,18 @@ import java.util.*;
  * Serializer for all object implementing Collection interface. Work only for collection of primitive, primitive array, string
  * or TODO Entry (of primitive, primirive array, string....)
  */
-public class CollectionSerializer extends TypeSerializer<Collection> {
+class CollectionSerializer extends TypeSerializer<Collection> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectionSerializer.class);
 
     @Override
-    public void serialize(Object sourceObject, StoreContext sc, ClassDesc cd, int fieldIndex) {
+    void serialize(Object sourceObject, StoreContext sc, ClassDesc cd, int fieldIndex) {
         Collection c = (Collection) UnsafeReflection.getObject(cd.fields[fieldIndex], sourceObject);
         serialize(c, cd.types[fieldIndex], sc);
     }
 
     @Override
-    public void serialize(Collection collection, Type type, StoreContext sc) {
+    void serialize(Collection collection, Type type, StoreContext sc) {
         // FIXME Element cannot be null
         // FIXME If something is not serializable put the reference (long) instead
         int collectionLength = collection.size();
@@ -40,7 +40,7 @@ public class CollectionSerializer extends TypeSerializer<Collection> {
     }
 
     @Override
-    public void deserialize(LoadContext lc, ClassDesc cd, Object dest, int fieldIndex) {
+    void deserialize(LoadContext lc, ClassDesc cd, Object dest, int fieldIndex) {
         Collection c = (Collection) UnsafeReflection.getObject(cd.fields[fieldIndex], dest);
         // If c don't exist... create them... By default use ArrayList
         if (c == null) {
@@ -54,7 +54,7 @@ public class CollectionSerializer extends TypeSerializer<Collection> {
     }
 
     @Override
-    public Collection deserialize(Type type, LoadContext lc) {
+    Collection deserialize(Type type, LoadContext lc) {
         Collection c = instanciate(Collection.class);
         deserialize(lc, c);
         return c;

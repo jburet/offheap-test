@@ -1,23 +1,19 @@
 package jbu.cache;
 
 import jbu.offheap.Allocator;
-import jbu.serializer.kryo.KryoFactory;
 import jbu.serializer.unsafe.UnsafePrimitiveBeanSerializer;
-import jbu.testobject.LotOfPrimitive;
 import jbu.testobject.LotOfPrimitiveAndArrayAndString;
 import jbu.testobject.LotOfString;
 import jbu.testobject.ObjectWithArrayList;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BenchCache {
 
     @Test
     public void bench_put_get() {
-        // FIXME Kryo memory leak on not registered class
-        KryoFactory.getInstance().register(LotOfPrimitive.class);
+
         // Put n object in map
         // Get them all
         // Remove them
@@ -32,7 +28,7 @@ public class BenchCache {
         Allocator allocator = new Allocator(1024 * 1024 * 1024);
         Cache<Integer, LotOfPrimitiveAndArrayAndString> cache = new Cache<Integer, LotOfPrimitiveAndArrayAndString>("testCache", allocator, new UnsafePrimitiveBeanSerializer());
         LotOfPrimitiveAndArrayAndString cachedObject = new LotOfPrimitiveAndArrayAndString();
-        int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
+        int estimSize = new UnsafePrimitiveBeanSerializer().calculateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
         System.out.println("Object size  : " + estimSize);
         System.out.println("Store : " + NB_OBJ);
@@ -75,8 +71,6 @@ public class BenchCache {
 
     @Test
     public void bench_put_get_string() {
-        // FIXME Kryo memory leak on not registered class
-        KryoFactory.getInstance().register(LotOfPrimitive.class);
         // Put n object in map
         // Get them all
         // Remove them
@@ -91,7 +85,7 @@ public class BenchCache {
         Allocator allocator = new Allocator(1024 * 1024 * 1024);
         Cache<Integer, LotOfString> cache = new Cache<Integer, LotOfString>("testCache", allocator, new UnsafePrimitiveBeanSerializer());
         LotOfString cachedObject = new LotOfString();
-        int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
+        int estimSize = new UnsafePrimitiveBeanSerializer().calculateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
         System.out.println("Object size  : " + estimSize);
         System.out.println("Store : " + NB_OBJ);
@@ -134,8 +128,6 @@ public class BenchCache {
 
     @Test
     public void bench_put_get_collection() {
-        // FIXME Kryo memory leak on not registered class
-        KryoFactory.getInstance().register(LotOfPrimitive.class);
         // Put n object in map
         // Get them all
         // Remove them
@@ -155,7 +147,7 @@ public class BenchCache {
                 "azertyuiop", "azertyuiop", "azertyuiop", "azertyuiop", "azertyuiop", "azertyuiop", "azertyuiop",
                 "azertyuiop", "azertyuiop", "azertyuiop", "azertyuiop", "azertyuiop", "azertyuiop", "azertyuiop",
                 "azertyuiop", "azertyuiop", "azertyuiop", "azertyuiop", "azertyuiop"});
-        int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
+        int estimSize = new UnsafePrimitiveBeanSerializer().calculateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
         System.out.println("Object size  : " + estimSize);
         System.out.println("Store : " + NB_OBJ);

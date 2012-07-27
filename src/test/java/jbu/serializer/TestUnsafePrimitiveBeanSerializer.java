@@ -37,7 +37,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -55,7 +55,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfBoolean c = new LotOfBoolean(true);
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -73,7 +73,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfChar c = new LotOfChar('a');
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -91,7 +91,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         SomeDouble c = new SomeDouble(1);
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -109,7 +109,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfDouble c = new LotOfDouble(1);
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -141,7 +141,7 @@ public class TestUnsafePrimitiveBeanSerializer {
 
         assertTrue(Arrays.equals(c.a, res.a));
         // estimated size
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
     }
 
     @Test
@@ -162,7 +162,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         //}
         assertTrue(Arrays.equals(c.a, res.a));
         // estimated size
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
     }
 
 
@@ -171,7 +171,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         ArrayLongPrimitive c = new ArrayLongPrimitive(new long[]{1, 2, 5, 10, 20});
-        System.out.println(pbs.estimateSerializedSize(c));
+        System.out.println(pbs.calculateSerializedSize(c));
         long addr = a.alloc(2048);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -196,7 +196,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitiveAndArrayAndString c = new LotOfPrimitiveAndArrayAndString();
-        System.out.println(pbs.estimateSerializedSize(c));
+        System.out.println(pbs.calculateSerializedSize(c));
         long addr = a.alloc(2048);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -213,7 +213,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         //    System.out.println(i);
         //}
         // estimated size
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
     }
 
     @Test
@@ -221,7 +221,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfDoubleArray c = new LotOfDoubleArray();
-        System.out.println(pbs.estimateSerializedSize(c));
+        System.out.println(pbs.calculateSerializedSize(c));
         long addr = a.alloc(1024);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -238,7 +238,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         //    System.out.println(i);
         //}
         // estimated size
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
     }
 
     @Test
@@ -247,7 +247,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfString c = new LotOfString();
         c.a = "test";
-        System.out.println(pbs.estimateSerializedSize(c));
+        System.out.println(pbs.calculateSerializedSize(c));
         long addr = a.alloc(4000);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -264,7 +264,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         //    System.out.println(i);
         //}
         // estimated size
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
     }
 
     @Test
@@ -277,7 +277,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         c.collection.add("ab");
         c.collection.add("abc");
         c.collection.add("abcd");
-        System.out.println(pbs.estimateSerializedSize(c));
+        System.out.println(pbs.calculateSerializedSize(c));
         long addr = a.alloc(4000);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -294,7 +294,7 @@ public class TestUnsafePrimitiveBeanSerializer {
         //    System.out.println(i);
         //}
         // estimated size
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
     }
 
 }

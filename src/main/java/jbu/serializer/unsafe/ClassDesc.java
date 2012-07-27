@@ -1,27 +1,27 @@
-package jbu.serializer.unsafe.type;
+package jbu.serializer.unsafe;
 
-import static jbu.UnsafeUtil.unsafe;
+import jbu.UnsafeReflection;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public final class ClassDesc {
+final class ClassDesc {
 
     private static final AtomicInteger classCounter = new AtomicInteger(0);
     private static final Map<Class, ClassDesc> classDescRefs = new HashMap<Class, ClassDesc>();
     private static final Map<Integer, ClassDesc> classDescRefsByInt = new HashMap<Integer, ClassDesc>();
 
-    public final Type[] types;
-    public final long[] offsets;
-    public final Field[] fields;
-    public final int nbFields;
-    public final int classReference;
-    public final Class<?> clazz;
+    final Type[] types;
+    final long[] offsets;
+    final Field[] fields;
+    final int nbFields;
+    final int classReference;
+    final Class<?> clazz;
 
     // FIXME must be correctly synchronized
-    public static ClassDesc resolveByClass(Class<?> clazz) {
+    static ClassDesc resolveByClass(Class<?> clazz) {
         if (!classDescRefs.containsKey(clazz)) {
             registerClass(clazz);
         }
@@ -29,7 +29,7 @@ public final class ClassDesc {
     }
 
     // FIXME manage class not exists
-    public static ClassDesc resolveByRef(Integer ref) {
+    static ClassDesc resolveByRef(Integer ref) {
         return classDescRefsByInt.get(ref);
     }
 
@@ -54,7 +54,7 @@ public final class ClassDesc {
         for (int i = 0; i < fields.length; i++) {
             Field f = fields[i];
             f.setAccessible(true);
-            offsets[i] = unsafe.objectFieldOffset(f);
+            offsets[i] = UnsafeReflection.getOffset(f);
             types[i] = Type.resolveType(f);
         }
         ClassDesc cd = new ClassDesc(types, offsets, fields, c);

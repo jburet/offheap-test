@@ -1,5 +1,6 @@
-package jbu.serializer.unsafe.type;
+package jbu.serializer.unsafe;
 
+import jbu.Primitive;
 import jbu.exception.InvalidJvmException;
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
@@ -11,7 +12,7 @@ import java.lang.reflect.Field;
 
 import static jbu.UnsafeUtil.unsafe;
 
-public class StringSerializer extends TypeSerializer<String> {
+class StringSerializer extends TypeSerializer<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StringSerializer.class);
     private static final Field OFFSET;
@@ -37,12 +38,12 @@ public class StringSerializer extends TypeSerializer<String> {
     }
 
     @Override
-    public void serialize(Object sourceObject, StoreContext sc, ClassDesc cd, int fieldIndex) {
+    void serialize(Object sourceObject, StoreContext sc, ClassDesc cd, int fieldIndex) {
         serialize((String) unsafe.getObject(sourceObject, cd.offsets[fieldIndex]), cd.types[fieldIndex], sc);
     }
 
     @Override
-    public void serialize(String string, Type type, StoreContext sc) {
+    void serialize(String string, Type type, StoreContext sc) {
         // For serializing String
 
         // get his offset
@@ -63,12 +64,12 @@ public class StringSerializer extends TypeSerializer<String> {
     }
 
     @Override
-    public void deserialize(LoadContext lc, ClassDesc cd, Object dest, int fieldIndex) {
+    void deserialize(LoadContext lc, ClassDesc cd, Object dest, int fieldIndex) {
         UnsafeReflection.setObject(cd.fields[fieldIndex], dest, deserialize(cd.types[fieldIndex], lc));
     }
 
     @Override
-    public String deserialize(Type type, LoadContext lc) {
+    String deserialize(Type type, LoadContext lc) {
         // get his length
         int stringLength = lc.loadInt();
         // recreate a char[] with content
@@ -77,11 +78,15 @@ public class StringSerializer extends TypeSerializer<String> {
         lc.loadArray(internalArray, UnsafeReflection.arrayBaseOffset(internalArray),
                 UnsafeReflection.getArraySizeContentInMem(internalArray));
         // create a new string
-        String destString = "";
+        String destString = new String();
         // replace all his internal value
         UnsafeReflection.setInt(OFFSET, destString, 0);
         UnsafeReflection.setInt(COUNT, destString, stringLength);
         UnsafeReflection.setObject(VALUE, destString, internalArray);
         return destString;
+    }
+
+    public int serializedSize(String obj) {
+        return (UnsafeReflection.getInt(COUNT, obj) * Primitive.CHAR_LENGTH) + Primitive.INT_LENGTH;
     }
 }

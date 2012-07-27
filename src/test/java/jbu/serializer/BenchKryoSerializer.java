@@ -17,7 +17,7 @@ public class BenchKryoSerializer {
         Serializer pbs = new KryoSerializer();
         LotOfPrimitiveAndArrayAndString c = new LotOfPrimitiveAndArrayAndString();
         LotOfPrimitiveAndArrayAndString res;
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
         long addr = a.alloc(1024);
         StoreContext sc = a.getStoreContext(addr);
         LoadContext lc = a.getLoadContext(addr);

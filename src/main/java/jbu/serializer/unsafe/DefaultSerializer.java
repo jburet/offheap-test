@@ -1,4 +1,4 @@
-package jbu.serializer.unsafe.type;
+package jbu.serializer.unsafe;
 
 import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
@@ -6,24 +6,24 @@ import jbu.offheap.StoreContext;
 /**
  * Used only when don't know how to serialize... Put the reference
  */
-public class DefaultSerializer extends TypeSerializer {
+class DefaultSerializer extends TypeSerializer {
     @Override
-    public void serialize(Object sourceObject, StoreContext sc, ClassDesc cd, int fieldIndex) {
+    void serialize(Object sourceObject, StoreContext sc, ClassDesc cd, int fieldIndex) {
         // DO nothing
     }
 
     @Override
-    public void serialize(Object objectToSerialize, Type type, StoreContext sc) {
+    void serialize(Object objectToSerialize, Type type, StoreContext sc) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
-    public void deserialize(LoadContext lc, ClassDesc cd, Object dest, int fieldIndex) {
+    void deserialize(LoadContext lc, ClassDesc cd, Object dest, int fieldIndex) {
         // Do nothing
     }
 
     @Override
-    public Object deserialize(Type type, LoadContext lc) {
+    Object deserialize(Type type, LoadContext lc) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

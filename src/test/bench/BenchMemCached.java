@@ -34,7 +34,7 @@ public class BenchMemCached {
         MemCachedClient mClient = new MemCachedClient();
 
         LotOfPrimitiveAndArrayAndString cachedObject = new LotOfPrimitiveAndArrayAndString();
-        int estimSize = new UnsafePrimitiveBeanSerializer().estimateSerializedSize(cachedObject);
+        int estimSize = new UnsafePrimitiveBeanSerializer().calculateSerializedSize(cachedObject);
         long objectSizeInMemory = estimSize * get / 1024 / 1024;
 
         for (int j = 0; j < NB_OBJ; j++) {

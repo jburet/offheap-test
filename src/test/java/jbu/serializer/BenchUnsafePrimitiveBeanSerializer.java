@@ -70,7 +70,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         int NB_MSG_WRITE = 1000000;
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
         System.out.println("Serialized size: " + serSize);
         StoreContext sc = a.getStoreContext(a.alloc(serSize));
 
@@ -93,7 +93,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         Allocator a = new Allocator(1 * 1024 * 1024);
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
         long addr = a.alloc(serSize);
         // Serialize
         StoreContext sc = a.getStoreContext(addr);
@@ -125,10 +125,10 @@ public class BenchUnsafePrimitiveBeanSerializer {
         int NB_MSG_WRITE = 1000000;
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
         long start = System.nanoTime();
         for (int i = 0; i < NB_MSG_WRITE; i++) {
-            int intSerSize = pbs.estimateSerializedSize(c);
+            int intSerSize = pbs.calculateSerializedSize(c);
             long addr = a.alloc(intSerSize);
             StoreContext sc = a.getStoreContext(addr);
             pbs.serialize(c, sc);
@@ -151,8 +151,8 @@ public class BenchUnsafePrimitiveBeanSerializer {
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitive c = new LotOfPrimitive();
         LotOfPrimitive res = new LotOfPrimitive();
-        int serSize = pbs.estimateSerializedSize(c);
-        int intSerSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
+        int intSerSize = pbs.calculateSerializedSize(c);
         long addr = a.alloc(intSerSize);
         StoreContext sc = a.getStoreContext(addr);
         LoadContext lc = a.getLoadContext(addr);
@@ -172,7 +172,7 @@ public class BenchUnsafePrimitiveBeanSerializer {
         Serializer pbs = new UnsafePrimitiveBeanSerializer();
         LotOfPrimitiveAndArrayAndString c = new LotOfPrimitiveAndArrayAndString();
         LotOfPrimitiveAndArrayAndString res = new LotOfPrimitiveAndArrayAndString();
-        int serSize = pbs.estimateSerializedSize(c);
+        int serSize = pbs.calculateSerializedSize(c);
         long addr = a.alloc(1024);
         StoreContext sc = a.getStoreContext(addr);
         LoadContext lc = a.getLoadContext(addr);

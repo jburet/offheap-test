@@ -6,6 +6,9 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
+/**
+ * This class provide {@code Unsafe} instance if implemented in runtime JVM.
+ */
 public final class UnsafeUtil {
 
     private UnsafeUtil() {
@@ -21,5 +24,8 @@ public final class UnsafeUtil {
         }
     }
 
+    /**
+     * The unsafe instance
+     */
     public static final Unsafe unsafe = getUnsafeInstance();
 }

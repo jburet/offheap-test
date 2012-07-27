@@ -28,28 +28,6 @@
             <artifactId>kryo</artifactId>
             <version>2.16</version>
         </dependency>
-
-
-        <!-- concurrent for benchmark -->
-        <dependency>
-            <groupId>org.apache.directmemory</groupId>
-            <artifactId>directmemory-cache</artifactId>
-            <version>0.1-incubating</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bigcache</groupId>
-            <artifactId>bigcache-core</artifactId>
-            <version>0.9</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.whalin</groupId>
-            <artifactId>Memcached-Java-Client</artifactId>
-            <version>3.0.0</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <repositories>
@@ -58,6 +36,23 @@
             <url>http://bigcache.org/maven/repository/</url>
         </repository>
     </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 
 </project>

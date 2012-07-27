@@ -8,6 +8,9 @@ import jbu.offheap.StoreContext;
 import jbu.serializer.Serializer;
 import jbu.UnsafeReflection;
 
+/**
+ * Serialize/Deserialize with Kryo directly inside StoreContext
+ */
 public class KryoSerializer implements Serializer {
 
     @Override
@@ -31,7 +34,7 @@ public class KryoSerializer implements Serializer {
     }
 
     @Override
-    public int estimateSerializedSize(Object obj) {
+    public int calculateSerializedSize(Object obj) {
         return 2048;
     }
 }
