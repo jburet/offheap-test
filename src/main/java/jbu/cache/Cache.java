@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Cache<K, V> implements CacheMBean {
+public final class Cache<K, V> implements CacheMBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Cache.class);
 

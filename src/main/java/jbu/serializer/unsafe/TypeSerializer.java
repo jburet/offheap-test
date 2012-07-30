@@ -4,7 +4,7 @@ import jbu.offheap.LoadContext;
 import jbu.offheap.StoreContext;
 
 /**
- * Serializer for type T
+ * Serializer for typeId T
  * Some concrete class not implements all methods
  *
  * @param <T>
@@ -22,7 +22,7 @@ abstract class TypeSerializer<T> {
     abstract void serialize(Object sourceObject, StoreContext sc, ClassDesc cd, int fieldIndex);
 
     /**
-     * Serialize {@code objectToSerialize} of {@link Type} {@code type} inside {@link StoreContext} {@code sc}
+     * Serialize {@code objectToSerialize} of {@link Type} {@code typeId} inside {@link StoreContext} {@code sc}
      *
      * @param objectToSerialize
      * @param type
@@ -41,7 +41,7 @@ abstract class TypeSerializer<T> {
     abstract void deserialize(LoadContext lc, ClassDesc cd, Object dest, int fieldIndex);
 
     /**
-     * Deserialize from {@link LoadContext} {@code lc} the object of {@link Type} {@code type}.
+     * Deserialize from {@link LoadContext} {@code lc} the object of {@link Type} {@code typeId}.
      * Instanciate and return the object
      *
      * @param type

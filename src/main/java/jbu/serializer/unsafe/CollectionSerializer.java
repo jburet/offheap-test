@@ -37,8 +37,8 @@ class CollectionSerializer extends TypeSerializer<Collection> {
         sc.storeInt(collectionLength);
         for (Object o : collection) {
             Type t = Type.resolveType(o.getClass());
-            // Store type on 4 byte
-            sc.storeInt(t.type);
+            // Store typeId on 4 byte
+            sc.storeInt(t.typeId);
             t.typeSerializer.serialize(o, t, sc);
         }
     }
@@ -70,7 +70,7 @@ class CollectionSerializer extends TypeSerializer<Collection> {
     private void deserialize(LoadContext lc, Collection c) {
         int collectionLength = lc.loadInt();
         for (int i = 0; i < collectionLength; i++) {
-            // load type
+            // load typeId
             Type type = Type.resolveType(lc.loadInt());
             // deserialize
             Object element = type.typeSerializer.deserialize(type, lc);
@@ -87,7 +87,7 @@ class CollectionSerializer extends TypeSerializer<Collection> {
             try {
                 return clazz.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
-                // Cannot instanciate this type of collection...
+                // Cannot instanciate this typeId of collection...
                 LOGGER.error("Cannot instance {}", clazz, e);
                 return null;
             }

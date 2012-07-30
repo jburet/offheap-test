@@ -18,12 +18,12 @@ class UnsafeBins extends Bins implements UnsafeBinsMBean {
     private long arrayBaseOffset = (long) unsafe.arrayBaseOffset(byte[].class);
 
     // Method for get address of a direct byte buffer
-    private static final Field bufferAddr;
+    private static final Field BUFFER_ADDR;
 
     static {
         try {
-            bufferAddr = Buffer.class.getDeclaredField("address");
-            bufferAddr.setAccessible(true);
+            BUFFER_ADDR = Buffer.class.getDeclaredField("address");
+            BUFFER_ADDR.setAccessible(true);
         } catch (NoSuchFieldException e) {
             // Never append ??
             throw new InvalidJvmException("Cannot use UnsafeBins in this JVM", e);
@@ -69,7 +69,7 @@ class UnsafeBins extends Bins implements UnsafeBinsMBean {
         if (data.isDirect()) {
             // get base adress of the buffer
             int length = (data.remaining() > this.chunkSize) ? this.chunkSize : data.remaining();
-            long dataAddr = UnsafeReflection.getLong(UnsafeBins.bufferAddr, data);
+            long dataAddr = UnsafeReflection.getLong(UnsafeBins.BUFFER_ADDR, data);
             long baseAddr = findOffsetForChunkId(chunkId) + binAddr;
 
             // put the length

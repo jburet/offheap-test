@@ -1,7 +1,10 @@
 package jbu;
 
+import sun.reflect.ReflectionFactory;
+
 import static jbu.UnsafeUtil.unsafe;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,6 +90,19 @@ public final class UnsafeReflection {
     public static boolean getBoolean(Field field, Object object) {
         long offset = getOffset(field);
         return unsafe.getBoolean(object, offset);
+    }
+
+    /**
+     * Sets the value of a field as a {@code boolean} on the specified object.
+     *
+     * @param field
+     * @param object the object whose field should be modified
+     * @param value  the new value for the field of {@code obj}
+     *               being modified
+     */
+    public static void setBoolean(Field field, Object object, boolean value) {
+        long offset = getOffset(field);
+        unsafe.putBoolean(object, offset, value);
     }
 
     /**
@@ -208,8 +224,7 @@ public final class UnsafeReflection {
      *               being modified
      */
     public static void setObject(Field field, Object object, Object value) {
-        long offset = getOffset(field);
-        unsafe.putObject(object, offset, value);
+        unsafe.putObject(object, getOffset(field), value);
     }
 
     /**

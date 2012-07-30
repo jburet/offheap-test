@@ -22,9 +22,9 @@ public class Allocator implements AllocatorMBean {
     private static final double MIN_FILL_FACTOR = 0.75d;
 
     //Thread safe until cannot be modified at runtime
-    private final Map<Integer, Bins> binsByAddr = new HashMap<Integer, Bins>();
+    private final Map<Integer, Bins> binsByAddr = new HashMap<>();
     //Thread safe until cannot be modified at runtime
-    private final NavigableMap<Integer, Bins> binsBySize = new TreeMap<Integer, Bins>();
+    private final NavigableMap<Integer, Bins> binsBySize = new TreeMap<>();
 
     private final AtomicInteger allocatedMemory = new AtomicInteger(0);
     private final AtomicInteger usedMemory = new AtomicInteger(0);

@@ -22,11 +22,59 @@ public class LoadContext {
         beginNewChunk(this.firstChunkAdr);
     }
 
+    public boolean loadBoolean() {
+        boolean res = unsafe.getBoolean(null, this.currentBaseAdr + this.currentOffset);
+        this.currentOffset += BOOLEAN_LENGTH;
+        this.remaining -= BOOLEAN_LENGTH;
+        return res;
+    }
+
+    public char loadChar() {
+        char res = unsafe.getChar(this.currentBaseAdr + this.currentOffset);
+        this.currentOffset += CHAR_LENGTH;
+        this.remaining -= CHAR_LENGTH;
+        return res;
+    }
+
+    public byte loadByte() {
+        byte res = unsafe.getByte(this.currentBaseAdr + this.currentOffset);
+        this.currentOffset += BYTE_LENGTH;
+        this.remaining -= BYTE_LENGTH;
+        return res;
+    }
+
+    public short loadShort() {
+        short res = unsafe.getShort(this.currentBaseAdr + this.currentOffset);
+        this.currentOffset += SHORT_LENGTH;
+        this.remaining -= SHORT_LENGTH;
+        return res;
+    }
+
     public int loadInt() {
         int res = unsafe.getInt(this.currentBaseAdr + this.currentOffset);
-        // FIXME 4 (int length) must be constant
         this.currentOffset += INT_LENGTH;
         this.remaining -= INT_LENGTH;
+        return res;
+    }
+
+    public long loadLong() {
+        long res = unsafe.getLong(this.currentBaseAdr + this.currentOffset);
+        this.currentOffset += LONG_LENGTH;
+        this.remaining -= LONG_LENGTH;
+        return res;
+    }
+
+    public float loadFloat() {
+        float res = unsafe.getFloat(this.currentBaseAdr + this.currentOffset);
+        this.currentOffset += FLOAT_LENGTH;
+        this.remaining -= FLOAT_LENGTH;
+        return res;
+    }
+
+    public double loadDouble() {
+        double res = unsafe.getDouble(this.currentBaseAdr + this.currentOffset);
+        this.currentOffset += DOUBLE_LENGTH;
+        this.remaining -= DOUBLE_LENGTH;
         return res;
     }
 
