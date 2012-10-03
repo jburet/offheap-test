@@ -26,8 +26,36 @@
         <dependency>
             <groupId>com.esotericsoftware.kryo</groupId>
             <artifactId>kryo</artifactId>
-            <version>2.16</version>
+            <version>2.20</version>
         </dependency>
+
+
+        <!-- project for bench for benchmark -->
+        <dependency>
+            <groupId>org.apache.directmemory</groupId>
+            <artifactId>directmemory-cache</artifactId>
+            <version>0.2-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directmemory</groupId>
+            <artifactId>directmemory-kryo</artifactId>
+            <version>0.2-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bigcache</groupId>
+            <artifactId>bigcache-core</artifactId>
+            <version>0.9.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.whalin</groupId>
+            <artifactId>Memcached-Java-Client</artifactId>
+            <version>3.0.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <repositories>

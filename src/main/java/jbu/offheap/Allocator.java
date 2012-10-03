@@ -31,22 +31,27 @@ public class Allocator implements AllocatorMBean {
     private final AtomicLong nbAllocation = new AtomicLong(0);
     private final AtomicLong nbFree = new AtomicLong(0);
 
-    public Allocator(int maxMemory) {
+    public Allocator(long maxMemory) {
         this(maxMemory, DEFAULT_MIN_CHUNK_SIZE);
     }
 
-    public Allocator(int maxMemory, int firstChunkSize) {
+    public Allocator(long maxMemory, int firstChunkSize) {
         constructWithLinearScale(maxMemory, 1, firstChunkSize);
     }
 
-    private void constructWithLinearScale(int initialMemory, int maxBins, int firstChunkSize) {
+    private void constructWithLinearScale(long initialMemory, int maxBins, int firstChunkSize) {
         // Construct scale
 
-        int binsSize = initialMemory / maxBins;
+        long binsSize = initialMemory / maxBins;
         int currentChunkSize = firstChunkSize;
 
         for (int i = 0; i < maxBins; i++) {
-            Bins bbb = new UnsafeBins((int) Math.ceil((double) binsSize / (double) currentChunkSize), currentChunkSize, i);
+            //int numberOfChunk = (int) Math.ceil((double) binsSize / (double) currentChunkSize);
+            int noc = (int) (binsSize / currentChunkSize);
+            if (binsSize % currentChunkSize > 0) {
+                noc++;
+            }
+            Bins bbb = new UnsafeBins(noc, currentChunkSize, i);
             binsBySize.put(currentChunkSize, bbb);
             binsByAddr.put(i, bbb);
             currentChunkSize = currentChunkSize * 2;

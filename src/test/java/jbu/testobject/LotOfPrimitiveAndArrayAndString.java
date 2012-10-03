@@ -289,4 +289,93 @@ public class LotOfPrimitiveAndArrayAndString implements Serializable {
         result = 31 * result + (l != null ? l.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "LotOfPrimitiveAndArrayAndString{" +
+                "b1=" + b1 +
+                ", b2=" + b2 +
+                ", b3=" + b3 +
+                ", b4=" + b4 +
+                ", b5=" + b5 +
+                ", b6=" + b6 +
+                ", b7=" + b7 +
+                ", b8=" + b8 +
+                ", c1=" + c1 +
+                ", c2=" + c2 +
+                ", c3=" + c3 +
+                ", c4=" + c4 +
+                ", c5=" + c5 +
+                ", c6=" + c6 +
+                ", c7=" + c7 +
+                ", c8=" + c8 +
+                ", by1=" + by1 +
+                ", by2=" + by2 +
+                ", by3=" + by3 +
+                ", by4=" + by4 +
+                ", by5=" + by5 +
+                ", by6=" + by6 +
+                ", by7=" + by7 +
+                ", by8=" + by8 +
+                ", s1=" + s1 +
+                ", s2=" + s2 +
+                ", s3=" + s3 +
+                ", s4=" + s4 +
+                ", s5=" + s5 +
+                ", s6=" + s6 +
+                ", s7=" + s7 +
+                ", s8=" + s8 +
+                ", i1=" + i1 +
+                ", i2=" + i2 +
+                ", i3=" + i3 +
+                ", i4=" + i4 +
+                ", i5=" + i5 +
+                ", i6=" + i6 +
+                ", i7=" + i7 +
+                ", i8=" + i8 +
+                ", l1=" + l1 +
+                ", l2=" + l2 +
+                ", l3=" + l3 +
+                ", l4=" + l4 +
+                ", l5=" + l5 +
+                ", l6=" + l6 +
+                ", l7=" + l7 +
+                ", l8=" + l8 +
+                ", f1=" + f1 +
+                ", f2=" + f2 +
+                ", f3=" + f3 +
+                ", f4=" + f4 +
+                ", f5=" + f5 +
+                ", f6=" + f6 +
+                ", f7=" + f7 +
+                ", f8=" + f8 +
+                ", d1=" + d1 +
+                ", d2=" + d2 +
+                ", d3=" + d3 +
+                ", d4=" + d4 +
+                ", d5=" + d5 +
+                ", d6=" + d6 +
+                ", d7=" + d7 +
+                ", d8=" + d8 +
+                ", da1=" + da1 +
+                ", da2=" + da2 +
+                ", da3=" + da3 +
+                ", da4=" + da4 +
+                ", da5=" + da5 +
+                ", da6=" + da6 +
+                ", da7=" + da7 +
+                ", da8=" + da8 +
+                ", a='" + a + '\'' +
+                ", b='" + b + '\'' +
+                ", c='" + c + '\'' +
+                ", d='" + d + '\'' +
+                ", e='" + e + '\'' +
+                ", f='" + f + '\'' +
+                ", h='" + h + '\'' +
+                ", i='" + i + '\'' +
+                ", j='" + j + '\'' +
+                ", k='" + k + '\'' +
+                ", l='" + l + '\'' +
+                '}';
+    }
 }
