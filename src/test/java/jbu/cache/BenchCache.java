@@ -19,19 +19,19 @@ public class BenchCache {
         // Get them all
         // Remove them
         // etc...
-        int NB_OBJ = 100000;
+        int NB_OBJ = 1000000;
 
         long putTime = 0;
         long put = 0;
         long getTime = 0;
         long get = 0;
 
-        Allocator allocator = new Allocator(1024 * 1024 * 1024);
+        Allocator allocator = new Allocator(4l * 1024l * 1024l * 1024l);
         Cache<Integer, LotOfPrimitiveAndArrayAndString> cache = new Cache<Integer, LotOfPrimitiveAndArrayAndString>("testCache", allocator, new UnsafePrimitiveBeanSerializer());
         LotOfPrimitiveAndArrayAndString cachedObject = new LotOfPrimitiveAndArrayAndString();
         int estimSize = new UnsafePrimitiveBeanSerializer().calculateSerializedSize(cachedObject);
-        long objectSizeInMemory = estimSize * get / 1024 / 1024;
-        System.out.println("Object size  : " + estimSize);
+        long objectSizeInMemory = estimSize * NB_OBJ / 1024 / 1024;
+        System.out.println("Need to cache  : " + estimSize + " MB");
         System.out.println("Store : " + NB_OBJ);
         for (int j = 0; j < 100; j++) {
             long start = System.nanoTime();
