@@ -35,7 +35,8 @@ class UnsafeBins extends Bins implements UnsafeBinsMBean {
     UnsafeBins(int initialChunkNumber, int chunkSize, int baseAddr) {
         super(initialChunkNumber, chunkSize, baseAddr);
         // FIXME Cannot allocate more than Integer.MAX_VALUE. Check this
-        binAddr = unsafe.allocateMemory((long)initialChunkNumber * (long)finalChunkSize);
+        binAddr = unsafe.allocateMemory((long) initialChunkNumber * (long) finalChunkSize);
+        System.out.println("First addr : " + binAddr);
     }
 
     @Override
@@ -104,6 +105,7 @@ class UnsafeBins extends Bins implements UnsafeBinsMBean {
     void setNextChunkId(int currentChunkId, long nextChunkId) {
         // Set nextChunkId to last 8 bytes of currentChunkId
         long nextChunkOffset = binAddr + findOffsetForChunkId(currentChunkId) + chunkSize + INT_LENGTH;
+        //System.out.println(nextChunkOffset + "  " + nextChunkId + " " + findOffsetForChunkId(currentChunkId));
         unsafe.putLong(nextChunkOffset, nextChunkId);
     }
 

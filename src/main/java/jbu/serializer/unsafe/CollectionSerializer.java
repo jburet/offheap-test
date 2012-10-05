@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  * Serializer for all object implementing Collection interface. Work only for collection of primitive, primitive array, string
- * or TODO Entry (of primitive, primirive array, string....)
+ * or TODO Entry (of primitive, primitive array, string....)
  */
 class CollectionSerializer extends TypeSerializer<Collection> {
 

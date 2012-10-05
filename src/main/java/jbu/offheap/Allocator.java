@@ -18,7 +18,7 @@ public class Allocator implements AllocatorMBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Allocator.class);
 
-    private static final int DEFAULT_MIN_CHUNK_SIZE = 256;
+    private static final int DEFAULT_MIN_CHUNK_SIZE = 3500;
     private static final double MIN_FILL_FACTOR = 0.75d;
 
     //Thread safe until cannot be modified at runtime
